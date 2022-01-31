@@ -2,7 +2,8 @@
 #include "cpp-utils.h"
 #include "vecoptions.h"
 #include "game.h"
-
+#include <iostream>
+using namespace std;
 const int32_t END_OF_BUFFER = 0xCAFECAFE;
 
 extern void coinrun_old_init(int rand_seed);
@@ -266,7 +267,7 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
         s.high.int32 = INT32_MAX;
         info_types.push_back(s);
     }
-    
+
     if (render_human) {
         struct libenv_tensortype s;
         strcpy(s.name, "rgb");
@@ -298,6 +299,47 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
 
     fassert(num_envs % num_joint_games == 0);
 
+    // To add to get_info dict
+    if (env_name == "coinrun" || env_name == "ecoinrun"){
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "coin_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+    } else if (env_name == "heist") {
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "key_count");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.ndim = 0,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+    }
+
+    if (env_name == "heist" || env_name == "ecoinrun"){
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "agent_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+    }
+
+
     RandGen game_level_seed_gen;
     game_level_seed_gen.seed(rand_seed);
 
@@ -328,6 +370,7 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
 
         games[n]->game_init();
     }
+
 }
 
 void VecGame::set_buffers(const std::vector<std::vector<void *>> &ac, const std::vector<std::vector<void *>> &ob, const std::vector<std::vector<void *>> &info, float *rew, uint8_t *first) {
@@ -342,7 +385,7 @@ void VecGame::set_buffers(const std::vector<std::vector<void *>> &ac, const std:
             game->info_bufs = info[e];
             game->reward_ptr = &rew[e];
             game->first_ptr = &first[e];
-            
+
             // render the initial state so we don't see a black screen on the first frame
             fassert(!game->is_waiting_for_step);
             fassert(!game->initial_reset_complete);

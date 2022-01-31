@@ -6,7 +6,7 @@
 #include "../cpp-utils.h"
 #include "../qt-utils.h"
 
-const std::string NAME = "coinrun";
+const std::string NAME = "ecoinrun";
 
 const float GOAL_REWARD = 10.0f;
 
@@ -29,13 +29,13 @@ const int ENEMY_BARRIER = 19;
 
 const int CRATE = 20;
 
-std::vector<std::string> WALKING_ENEMIES = {"slimeBlock", "slimePurple", "slimeBlue", "slimeGreen", "mouse", "snail", "ladybug", "wormGreen", "wormPink"};
-std::vector<std::string> PLAYER_THEME_COLORS = {"Beige", "Blue", "Green", "Pink", "Yellow"};
-std::vector<std::string> GROUND_THEMES = {"Dirt", "Grass", "Planet", "Sand", "Snow", "Stone"};
+std::vector<std::string> WALKING_ENEMIES2 = {"slimeBlock", "slimePurple", "slimeBlue", "slimeGreen", "mouse", "snail", "ladybug", "wormGreen", "wormPink"};
+std::vector<std::string> PLAYER_THEME_COLORS2 = {"Beige", "Blue", "Green", "Pink", "Yellow"};
+std::vector<std::string> GROUND_THEMES2 = {"Dirt", "Grass", "Planet", "Sand", "Snow", "Stone"};
 
-const int NUM_GROUND_THEMES = (int)(GROUND_THEMES.size());
+const int NUM_GROUND_THEMES2 = (int)(GROUND_THEMES2.size());
 
-class CoinRun : public BasicAbstractGame {
+class ECoinRun : public BasicAbstractGame {
   public:
     std::shared_ptr<Entity> goal;
     float last_agent_y = 0.0f;
@@ -46,7 +46,7 @@ class CoinRun : public BasicAbstractGame {
     float gravity = 0.0f;
     float air_control = 0.0f;
 
-    CoinRun()
+    ECoinRun()
         : BasicAbstractGame(NAME) {
         visibility = 13;
         mixrate = 0.2f;
@@ -71,37 +71,37 @@ class CoinRun : public BasicAbstractGame {
 
     void asset_for_type(int type, std::vector<std::string> &names) override {
         if (type == PLAYER) {
-            for (const auto &color : PLAYER_THEME_COLORS) {
+            for (const auto &color : PLAYER_THEME_COLORS2) {
                 names.push_back("kenney/Players/128x256/" + color + "/alien" + color + "_stand.png");
             }
         } else if (type == PLAYER_JUMP) {
-            for (const auto &color : PLAYER_THEME_COLORS) {
+            for (const auto &color : PLAYER_THEME_COLORS2) {
                 names.push_back("kenney/Players/128x256/" + color + "/alien" + color + "_jump.png");
             }
         } else if (type == PLAYER_RIGHT1) {
-            for (const auto &color : PLAYER_THEME_COLORS) {
+            for (const auto &color : PLAYER_THEME_COLORS2) {
                 names.push_back("kenney/Players/128x256/" + color + "/alien" + color + "_walk1.png");
             }
         } else if (type == PLAYER_RIGHT2) {
-            for (const auto &color : PLAYER_THEME_COLORS) {
+            for (const auto &color : PLAYER_THEME_COLORS2) {
                 names.push_back("kenney/Players/128x256/" + color + "/alien" + color + "_walk2.png");
             }
         } else if (type == ENEMY1) {
-            for (const auto &enemy : WALKING_ENEMIES) {
+            for (const auto &enemy : WALKING_ENEMIES2) {
                 names.push_back("kenney/Enemies/" + enemy + ".png");
             }
         } else if (type == ENEMY2) {
-            for (const auto &enemy : WALKING_ENEMIES) {
+            for (const auto &enemy : WALKING_ENEMIES2) {
                 names.push_back("kenney/Enemies/" + enemy + "_move.png");
             }
         } else if (type == GOAL) {
             names.push_back("kenney/Items/coinGold.png");
         } else if (type == WALL_TOP) {
-            for (const auto &ground : GROUND_THEMES) {
+            for (const auto &ground : GROUND_THEMES2) {
                 names.push_back("kenney/Ground/" + ground + "/" + to_lower(ground) + "Mid.png");
             }
         } else if (type == WALL_MID) {
-            for (const auto &ground : GROUND_THEMES) {
+            for (const auto &ground : GROUND_THEMES2) {
                 names.push_back("kenney/Ground/" + ground + "/" + to_lower(ground) + "Center.png");
             }
         } else if (type == LAVA_TOP) {
@@ -275,7 +275,8 @@ class CoinRun : public BasicAbstractGame {
 
         bool allow_pit = (options.debug_mode & (1 << 1)) == 0;
         bool allow_crate = (options.debug_mode & (1 << 2)) == 0;
-        bool allow_dy = (options.debug_mode & (1 << 3)) == 0;
+        // bool allow_dy = (options.debug_mode & (1 << 3)) == 0;
+        bool allow_dy = false;
 
         int w = main_width;
 
@@ -285,18 +286,15 @@ class CoinRun : public BasicAbstractGame {
         int max_dy = (_max_dy - .5);
         int max_dx = (_max_dx - .5);
 
-        bool allow_monsters = true;
-
-        if (options.distribution_mode == EasyMode) {
-            allow_monsters = false;
-        }
+        bool allow_monsters = false;
 
         for (int section_idx = 0; section_idx < num_sections; section_idx++) {
             if (curr_x + 15 >= w) {
                 break;
             }
 
-            int dy = rand_gen.randn(4) + 1 + int(dif / 3);
+            // int dy = rand_gen.randn(4) + 1 + int(dif / 3);
+            int dy = int(dif / 3);
 
             if (!allow_dy) {
                 dy = 0;
@@ -409,10 +407,20 @@ class CoinRun : public BasicAbstractGame {
 
         set_obj(curr_x, curr_y, GOAL);
 
-        *(int32_t *)(info_bufs[info_name_to_offset.at("coin_pos")]) = curr_x;
+        // To give object positions
+        int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at("coin_pos")]);
+        data[0] = curr_x;
+        data[1] = curr_y;
 
         fill_ground_block(curr_x, 0, 1, curr_y);
         fill_elem(curr_x + 1, 0, main_width - curr_x - 1, main_height, WALL_MID);
+    }
+
+    void observe() override {
+        Game::observe();
+        int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]);
+        data[0] = agent->x;
+        data[1] = agent->y;
     }
 
     void game_reset() override {
@@ -431,7 +439,7 @@ class CoinRun : public BasicAbstractGame {
             background_index = 0;
         } else {
             choose_random_theme(agent);
-            wall_theme = rand_gen.randn(NUM_GROUND_THEMES);
+            wall_theme = rand_gen.randn(NUM_GROUND_THEMES2);
         }
 
         agent->rx = .5;
@@ -522,4 +530,4 @@ class CoinRun : public BasicAbstractGame {
     }
 };
 
-REGISTER_GAME(NAME, CoinRun);
+REGISTER_GAME(NAME, ECoinRun);

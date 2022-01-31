@@ -112,6 +112,21 @@ class HeistGame : public BasicAbstractGame {
         main_height = world_dim;
     }
 
+    void observe() override {
+        Game::observe();
+        int32_t key_count = 0;
+        for (const auto& has_key : has_keys) {
+            if (has_key) {
+                key_count++;
+            }
+        }
+        *(int32_t *)(info_bufs[info_name_to_offset.at("key_count")]) = key_count;
+        // *(int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]) = agent->x;
+        int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]);
+        data[0] = agent->x;
+        data[1] = agent->y;
+    }
+
     void game_reset() override {
         BasicAbstractGame::game_reset();
 

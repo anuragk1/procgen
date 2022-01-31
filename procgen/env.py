@@ -18,6 +18,7 @@ ENV_NAMES = [
     "chaser",
     "climber",
     "coinrun",
+    "ecoinrun",
     "dodgeball",
     "fruitbot",
     "heist",
@@ -94,7 +95,7 @@ class BaseProcgenEnv(CEnv):
         else:
             # only compile if we don't find a pre-built binary
             lib_dir = build(debug=debug)
-        
+
         self.combos = self.get_combos()
 
         if render_mode is None:
@@ -244,8 +245,8 @@ class ProcgenGym3Env(BaseProcgenEnv):
                 "distribution_mode": distribution_mode,
             }
         super().__init__(num, env_name, options, **kwargs)
-        
-        
+
+
 class ToBaselinesVecEnv(gym3.ToBaselinesVecEnv):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
@@ -258,7 +259,7 @@ class ToBaselinesVecEnv(gym3.ToBaselinesVecEnv):
             if "rgb" in info:
                 return info["rgb"]
             else:
-                return ob['rgb'][0]        
+                return ob['rgb'][0]
 
 
 def ProcgenEnv(num_envs, env_name, **kwargs):
