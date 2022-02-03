@@ -1,16 +1,24 @@
 from utils_procgen import InteractiveEnv
+from procgen import ProcgenGym3Env
 import numpy as np
 import sys
 
+INTERACTIVE = False
 
 env_name = "ecoinrun"
-env = InteractiveEnv(env_name)
+if INTERACTIVE:
+    env = InteractiveEnv(env_name)
+else:
+    env = ProcgenGym3Env(num=1, env_name=env_name)
 step = 1
 NB_DONE = 0
 TO_SUCCEED = 3
 frames = []
 while NB_DONE < TO_SUCCEED:
-    env.iact()
+    if INTERACTIVE:
+        env.iact()  # Slow because renders
+    else:
+        env.act(env.action_space.sample())
     rew, obs, first = env.observe()
     all_objects = env.get_info()[0]
     agent_pos = all_objects["agent_pos"]

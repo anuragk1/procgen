@@ -11,7 +11,7 @@ _key_to_name = {
 
 class InteractiveEnv(gym3.ViewerWrapper):
     def __init__(self, env_name):
-        env = ProcgenGym3Env(num=1, env_name=env_name, render_mode="rgb_array")
+        env = ProcgenGym3Env(num=1, env_name=env_name)
         super().__init__(env, info_key="rgb")
         glfw.set_key_callback(self._renderer._window, self._on_key_event)
         self._keys_pressed, self._keys_clicked = set(), set()
