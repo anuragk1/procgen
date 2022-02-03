@@ -6,6 +6,8 @@
 #include "../cpp-utils.h"
 #include "../qt-utils.h"
 
+#include <iostream>
+
 const std::string NAME = "ecoinrun";
 
 const float GOAL_REWARD = 10.0f;
@@ -34,6 +36,10 @@ std::vector<std::string> PLAYER_THEME_COLORS2 = {"Beige", "Blue", "Green", "Pink
 std::vector<std::string> GROUND_THEMES2 = {"Dirt", "Grass", "Planet", "Sand", "Snow", "Stone"};
 
 const int NUM_GROUND_THEMES2 = (int)(GROUND_THEMES2.size());
+
+
+const int UNDEFINED_POSITION = -1;
+
 
 class ECoinRun : public BasicAbstractGame {
   public:
@@ -421,6 +427,19 @@ class ECoinRun : public BasicAbstractGame {
         int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]);
         data[0] = agent->x;
         data[1] = agent->y;
+
+        // SAW ENEMY
+        std::string enemy_poses[4] = {"saw1_pos", "saw2_pos", "saw3_pos", "saw4_pos"};
+        int enemy_nb = 0;
+        for (int i = 0 ; i < (int)(entities.size()); i++) {
+            auto ent = entities[i];
+            if (ent->type == SAW) {
+                // std::cout << (int32_t)ent->x << "," << (int32_t)ent->y << std::endl;
+                // std::cout << enemy_poses[enemy_nb] << std::endl;
+                set_pos(enemy_poses[enemy_nb], ent->x, ent->y);
+                enemy_nb++;
+            }
+        }
     }
 
     void game_reset() override {
@@ -452,6 +471,17 @@ class ECoinRun : public BasicAbstractGame {
 
         init_floor_and_walls();
         generate_coin_to_the_right();
+
+        set_pos("saw1_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
+        set_pos("saw2_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
+        set_pos("saw3_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
+        set_pos("saw4_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
+    }
+
+    void set_pos(const std::string & name, int32_t x, int32_t y){
+        int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at(name)]);
+        data[0] = x;
+        data[1] = y;
     }
 
     bool can_support(int obj) {

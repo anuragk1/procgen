@@ -312,6 +312,50 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
           s.high.int32 = INT32_MAX;
           info_types.push_back(s);
       }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "saw1_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "saw2_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "saw3_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "saw4_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
     } else if (env_name == "heist") {
       {
           struct libenv_tensortype s;
@@ -324,6 +368,19 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
           info_types.push_back(s);
       }
     }
+    // } else if (env_name == "ecoinrun") {
+    //   {
+    //       struct libenv_tensortype s;
+    //       strcpy(s.name, "saw_pos");
+    //       s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
+    //       s.dtype = LIBENV_DTYPE_FLOAT32;
+    //       s.shape[0] = 2;
+    //       s.ndim = 1,
+    //       s.low.float32 = 0,
+    //       s.high.float32 = 500.0,
+    //       info_types.push_back(s);
+    //   }
+    // }
 
     if (env_name == "heist" || env_name == "ecoinrun"){
       {
