@@ -3,7 +3,7 @@ from procgen import ProcgenGym3Env
 import numpy as np
 import sys
 
-INTERACTIVE = False
+INTERACTIVE = True
 
 env_name = "ecoinrun"
 if INTERACTIVE:
@@ -18,7 +18,7 @@ while NB_DONE < TO_SUCCEED:
     if INTERACTIVE:
         env.iact()  # Slow because renders
     else:
-        env.act(env.action_space.sample())
+        env.act(np.random.randint((env.ac_space.eltype.n,)))
     rew, obs, first = env.observe()
     all_objects = env.get_info()[0]
     agent_pos = all_objects["agent_pos"]
