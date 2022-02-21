@@ -429,7 +429,7 @@ class ECoinRun : public BasicAbstractGame {
         data[1] = agent->y;
 
         // SAW ENEMY
-        std::string enemy_poses[8] = {"saw1_pos", "saw2_pos", "saw3_pos", "saw4_pos", "saw5_pos", "saw6_pos", "saw7_pos", "saw8_pos"};
+        std::string enemy_poses[5] = {"saw1_pos", "saw2_pos", "saw3_pos", "saw4_pos", "saw5_pos"};
         int enemy_nb = 0;
         for (int i = 0 ; i < std::min((int)(entities.size()), 8); i++) {
             auto ent = entities[i];
@@ -477,9 +477,6 @@ class ECoinRun : public BasicAbstractGame {
         set_pos("saw3_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
         set_pos("saw4_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
         set_pos("saw5_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
-        set_pos("saw6_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
-        set_pos("saw7_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
-        set_pos("saw8_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
     }
 
     void set_pos(const std::string & name, int32_t x, int32_t y){
