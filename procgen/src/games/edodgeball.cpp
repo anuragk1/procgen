@@ -333,15 +333,15 @@ class EDodgeballGame : public BasicAbstractGame {
 
         int exit_wall_choice = rand_gen.randn(4);
 
-        // if (exit_wall_choice == 0) {
-        //     spawn_entity_rxy(doorlen / 2, exit_r, DOOR, 2 * border_r, 2 * border_r, main_width - 4 * border_r, 2 * exit_r);
-        // } else if (exit_wall_choice == 1) {
-        //     spawn_entity_rxy(doorlen / 2, exit_r, DOOR, 2 * border_r, main_height - 2 * border_r - 2 * exit_r, main_width - 4 * border_r, 2 * exit_r);
-        // } else if (exit_wall_choice == 2) {
-        //     spawn_entity_rxy(exit_r, doorlen / 2, DOOR, 2 * border_r, 2 * border_r, 2 * exit_r, main_height - 4 * border_r);
-        // } else if (exit_wall_choice == 3) {
-        //     spawn_entity_rxy(exit_r, doorlen / 2, DOOR, main_width - 2 * border_r - 2 * exit_r, 2 * border_r, 2 * exit_r, main_height - 4 * border_r);
-        // }
+        if (exit_wall_choice == 0) {
+            spawn_entity_rxy(doorlen / 2, exit_r, DOOR, 2 * border_r, 2 * border_r, main_width - 4 * border_r, 2 * exit_r);
+        } else if (exit_wall_choice == 1) {
+            spawn_entity_rxy(doorlen / 2, exit_r, DOOR, 2 * border_r, main_height - 2 * border_r - 2 * exit_r, main_width - 4 * border_r, 2 * exit_r);
+        } else if (exit_wall_choice == 2) {
+            spawn_entity_rxy(exit_r, doorlen / 2, DOOR, 2 * border_r, 2 * border_r, 2 * exit_r, main_height - 4 * border_r);
+        } else if (exit_wall_choice == 3) {
+            spawn_entity_rxy(exit_r, doorlen / 2, DOOR, main_width - 2 * border_r - 2 * exit_r, 2 * border_r, 2 * exit_r, main_height - 4 * border_r);
+        }
 
         reposition_agent();
 
@@ -483,13 +483,24 @@ class EDodgeballGame : public BasicAbstractGame {
         std::string enemy_poses[4] = {"enemy1_pos", "enemy2_pos", "enemy3_pos",
                                       "enemy4_pos"};
         int enemy_nb = 0;
+        set_pos("enemy1_pos", -1, -1);
+        set_pos("enemy2_pos", -1, -1);
+        set_pos("enemy3_pos", -1, -1);
+        set_pos("enemy4_pos", -1, -1);
         for (int i = 0 ; i < (int)(entities.size()); i++) {
             auto ent = entities[i];
-            if (ent->type == ENEMY && enemy_nb < 4) {
+            if (ent->type == ENEMY) {
                 // std::cout << (int32_t)ent->x << "," << (int32_t)ent->y << std::endl;
                 // std::cout << enemy_poses[enemy_nb] << std::endl;
-                set_pos(enemy_poses[enemy_nb], ent->x, ent->y);
+
+                if (ent->health > 0){
+                  set_pos(enemy_poses[enemy_nb], ent->x, ent->y);
+                } else {
+                  set_pos(enemy_poses[enemy_nb], -1, -1);
+                }
                 enemy_nb++;
+            } else if (ent->type == DOOR) {
+              set_pos("door_pos", ent->x, ent->y);
             }
         }
       }

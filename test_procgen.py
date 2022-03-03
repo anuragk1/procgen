@@ -8,7 +8,7 @@ INTERACTIVE = True
 # env_name = "ecoinrun"
 # obj_list = ["coin_pos", "saw1_pos", "saw2_pos", "saw3_pos", "saw4_pos"]
 env_name = "edodgeball"
-obj_list = ["enemy1_pos", "enemy2_pos", "enemy3_pos", "enemy4_pos"]
+obj_list = ["door_pos", "enemy1_pos", "enemy2_pos", "enemy3_pos", "enemy4_pos"]
 if INTERACTIVE:
     env = InteractiveEnv(env_name)
 else:
