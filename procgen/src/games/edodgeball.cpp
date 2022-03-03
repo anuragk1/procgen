@@ -333,15 +333,15 @@ class EDodgeballGame : public BasicAbstractGame {
 
         int exit_wall_choice = rand_gen.randn(4);
 
-        if (exit_wall_choice == 0) {
-            spawn_entity_rxy(doorlen / 2, exit_r, DOOR, 2 * border_r, 2 * border_r, main_width - 4 * border_r, 2 * exit_r);
-        } else if (exit_wall_choice == 1) {
-            spawn_entity_rxy(doorlen / 2, exit_r, DOOR, 2 * border_r, main_height - 2 * border_r - 2 * exit_r, main_width - 4 * border_r, 2 * exit_r);
-        } else if (exit_wall_choice == 2) {
-            spawn_entity_rxy(exit_r, doorlen / 2, DOOR, 2 * border_r, 2 * border_r, 2 * exit_r, main_height - 4 * border_r);
-        } else if (exit_wall_choice == 3) {
-            spawn_entity_rxy(exit_r, doorlen / 2, DOOR, main_width - 2 * border_r - 2 * exit_r, 2 * border_r, 2 * exit_r, main_height - 4 * border_r);
-        }
+        // if (exit_wall_choice == 0) {
+        //     spawn_entity_rxy(doorlen / 2, exit_r, DOOR, 2 * border_r, 2 * border_r, main_width - 4 * border_r, 2 * exit_r);
+        // } else if (exit_wall_choice == 1) {
+        //     spawn_entity_rxy(doorlen / 2, exit_r, DOOR, 2 * border_r, main_height - 2 * border_r - 2 * exit_r, main_width - 4 * border_r, 2 * exit_r);
+        // } else if (exit_wall_choice == 2) {
+        //     spawn_entity_rxy(exit_r, doorlen / 2, DOOR, 2 * border_r, 2 * border_r, 2 * exit_r, main_height - 4 * border_r);
+        // } else if (exit_wall_choice == 3) {
+        //     spawn_entity_rxy(exit_r, doorlen / 2, DOOR, main_width - 2 * border_r - 2 * exit_r, 2 * border_r, 2 * exit_r, main_height - 4 * border_r);
+        // }
 
         reposition_agent();
 
