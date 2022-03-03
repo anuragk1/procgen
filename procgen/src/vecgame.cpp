@@ -367,6 +367,51 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
           s.high.int32 = INT32_MAX;
           info_types.push_back(s);
       }
+    } else if (env_name == "edodgeball"){
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "enemy1_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "enemy2_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "enemy3_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "enemy4_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
     }
     // } else if (env_name == "ecoinrun") {
     //   {
@@ -382,7 +427,7 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
     //   }
     // }
 
-    if (env_name == "heist" || env_name == "ecoinrun"){
+    if (env_name == "heist" || env_name[0] == 'e'){
       {
           struct libenv_tensortype s;
           strcpy(s.name, "agent_pos");

@@ -440,7 +440,7 @@ class ECoinRun : public BasicAbstractGame {
                 enemy_nb++;
             }
         }
-    }
+      }
 
     void game_reset() override {
         BasicAbstractGame::game_reset();

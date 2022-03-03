@@ -5,7 +5,10 @@ import sys
 
 INTERACTIVE = True
 
-env_name = "ecoinrun"
+# env_name = "ecoinrun"
+# obj_list = ["coin_pos", "saw1_pos", "saw2_pos", "saw3_pos", "saw4_pos"]
+env_name = "edodgeball"
+obj_list = ["enemy1_pos", "enemy2_pos", "enemy3_pos", "enemy4_pos"]
 if INTERACTIVE:
     env = InteractiveEnv(env_name)
 else:
@@ -19,16 +22,20 @@ while NB_DONE < TO_SUCCEED:
         env.iact()  # Slow because renders
     else:
         env.act(np.random.randint((env.ac_space.eltype.n,)))
-    rew, obs, first = env.observe()
+    rew, obs, done = env.observe()
     all_objects = env.get_info()[0]
-    agent_pos = all_objects["agent_pos"]
-    print(f"agent pos: {agent_pos}")
-    for obj in ["coin_pos", "saw1_pos", "saw2_pos", "saw3_pos", "saw4_pos"]:
+    if env_name[0] == "e":
+        agent_pos = all_objects["agent_pos"]
+        print(f"agent pos: {agent_pos}")
+    for obj in obj_list:
         obj_pos = all_objects[obj]
-        if obj_pos[0] > 0 and np.abs(agent_pos[0] - obj_pos[0]) < 7:
+        if env_name == "edodgeball":
             print(f"{obj}: ", all_objects[obj])
+        elif env_name == "ecoinrun":
+            if obj_pos[0] > 0 and np.abs(agent_pos[0] - obj_pos[0]) < 7:
+                print(f"{obj}: ", all_objects[obj])
     print('-'*20)
-    if rew != 0:
+    if done:
         print(f"Done in {step} steps")
         step = 0
         NB_DONE += 1
