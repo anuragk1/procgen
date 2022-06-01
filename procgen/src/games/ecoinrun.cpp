@@ -429,15 +429,12 @@ class ECoinRun : public BasicAbstractGame {
         data[1] = agent->y;
 
         // SAW ENEMY
-        std::string enemy_poses[5] = {"saw1_pos", "saw2_pos", "saw3_pos", "saw4_pos", "saw5_pos"};
-        int enemy_nb = 0;
+        int saw_count = 0;
         for (int i = 0 ; i < std::min((int)(entities.size()), 8); i++) {
             auto ent = entities[i];
             if (ent->type == SAW) {
-                // std::cout << (int32_t)ent->x << "," << (int32_t)ent->y << std::endl;
-                // std::cout << enemy_poses[enemy_nb] << std::endl;
-                set_pos(enemy_poses[enemy_nb], ent->x, ent->y);
-                enemy_nb++;
+                set_pos_array("saws_pos", ent->x, ent->y, saw_count);
+                saw_count++;
             }
         }
       }
@@ -471,12 +468,15 @@ class ECoinRun : public BasicAbstractGame {
 
         init_floor_and_walls();
         generate_coin_to_the_right();
+        for (int c = 0 ; c < 5; c++) {
+          set_pos_array("saws_pos", UNDEFINED_POSITION, UNDEFINED_POSITION, c);
+        }
+    }
 
-        set_pos("saw1_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
-        set_pos("saw2_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
-        set_pos("saw3_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
-        set_pos("saw4_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
-        set_pos("saw5_pos", UNDEFINED_POSITION, UNDEFINED_POSITION);
+    void set_pos_array(const std::string & name, int32_t x, int32_t y, int32_t c){
+        int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at(name)]);
+        data[c*2+0] = x;
+        data[c*2+1] = y;
     }
 
     void set_pos(const std::string & name, int32_t x, int32_t y){
