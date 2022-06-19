@@ -460,7 +460,7 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
           s.high.int32 = INT32_MAX;
           info_types.push_back(s);
       }
-    } else if (env_name == "ebigfish") {
+    } else if (env_name.substr(0,8) == "ebigfish") {
         {
           struct libenv_tensortype s; // table of all fish
           strcpy(s.name, "fish_pos");

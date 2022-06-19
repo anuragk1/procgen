@@ -51,6 +51,8 @@ add_library(env
   src/games/edodgeball.cpp
   # src/games/bigfish.cpp
   src/games/ebigfish.cpp
+  src/games/ebigfishs.cpp
+  src/games/ebigfishl.cpp
   src/games/bossfight.cpp
   src/games/caveflyer.cpp
   src/games/climber.cpp

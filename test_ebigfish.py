@@ -5,7 +5,7 @@ import sys
 
 INTERACTIVE = True
 
-env_name = "ebigfish"
+env_name = "ebigfishl"
 obj_list = ["fish_pos", "fish_count", "fish_id"]
 
 if INTERACTIVE:
@@ -16,9 +16,10 @@ else:
 step = 1
 NB_DONE = 0
 TO_SUCCEED = 1
-
 # env_info = env.get_info()[0]
 # print(env_info.keys())
+
+total_reward = 0
 fish_dict = {}
 
 while NB_DONE < TO_SUCCEED:
@@ -28,6 +29,7 @@ while NB_DONE < TO_SUCCEED:
         env.act(np.random.randint((env.ac_space.eltype.n,)))
     
     rew, obs, done = env.observe()
+    total_reward += rew
     all_objects = env.get_info()[0]
     agent_pos = all_objects["agent_pos"]
     fish_ids = all_objects["fish_id"]
@@ -47,11 +49,13 @@ while NB_DONE < TO_SUCCEED:
     print(f"Agent_pos: {agent_pos}")
     for id, pos in fish_dict.items():
         print(f"id: {id}        position: {pos}")
+    print(f"Total Reward: {total_reward}")
     print('-'*20)
 
     if done:
         print(f"Done in {step} steps")
         step = 0
         NB_DONE += 1
+        total_reward = 0
         fish_dict.clear()
     step += 1
