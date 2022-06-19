@@ -5,6 +5,10 @@
 #include <memory>
 
 class Entity {
+
+  private:
+    unsigned long long int eID;
+
   public:
     float x = 0.0f;
     float y = 0.0f;
@@ -56,4 +60,5 @@ class Entity {
     void face_direction(float dx, float dy, float rotation_offset = 0);
     void serialize(WriteBuffer *b);
     void deserialize(ReadBuffer *b);
+    unsigned long long int get_id();
 };

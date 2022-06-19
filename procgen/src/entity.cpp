@@ -1,4 +1,5 @@
 #include "entity.h"
+#include<time.h>
 
 #include <math.h>
 
@@ -6,6 +7,10 @@ Entity::Entity() {
 }
 
 Entity::Entity(float _x, float _y, float _vx, float _vy, float _rx, float _ry, int _type) {
+    
+    time_t timestamp = time(0);
+    eID = timestamp + (rand() % 100);
+
     x = _x;
     y = _y;
     vx = _vx;
@@ -174,4 +179,8 @@ void Entity::deserialize(ReadBuffer *b) {
     grow_rate = b->read_float();
     alpha_decay = b->read_float();
     climber_spawn_x = b->read_float();
+}
+
+unsigned long long int Entity::get_id(){
+    return this->eID;
 }

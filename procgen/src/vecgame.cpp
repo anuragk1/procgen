@@ -3,7 +3,10 @@
 #include "vecoptions.h"
 #include "game.h"
 #include <iostream>
+// #include "./games/global_state.hpp"
 using namespace std;
+
+
 const int32_t END_OF_BUFFER = 0xCAFECAFE;
 
 extern void coinrun_old_init(int rand_seed);
@@ -324,6 +327,17 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
           s.high.int32 = INT32_MAX;
           info_types.push_back(s);
       }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "agent_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
       // {
       //     struct libenv_tensortype s;
       //     strcpy(s.name, "saw2_pos");
@@ -435,6 +449,62 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
           s.high.int32 = INT32_MAX;
           info_types.push_back(s);
       }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "agent_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+          s.dtype = LIBENV_DTYPE_INT32;
+          s.shape[0] = 2;
+          s.ndim = 1,
+          s.low.int32 = 0;
+          s.high.int32 = INT32_MAX;
+          info_types.push_back(s);
+      }
+    } else if (env_name == "ebigfish") {
+        {
+          struct libenv_tensortype s; // table of all fish
+          strcpy(s.name, "fish_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
+          s.dtype = LIBENV_DTYPE_FLOAT32;
+          s.shape[0] = 20; // Max possible fish 20
+          s.shape[1] = 3;
+          s.ndim = 2,
+          s.low.float32 = 0.25f;
+          s.high.float32 = 2.0f;
+          info_types.push_back(s);
+      }
+      {
+        struct libenv_tensortype s;
+        strcpy(s.name, "fish_count");
+        s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+        s.dtype = LIBENV_DTYPE_INT32;
+        s.ndim = 0,
+        s.low.int32 = 0;
+        s.high.int32 = INT32_MAX;
+        info_types.push_back(s);
+    }
+    {
+        struct libenv_tensortype s;
+        strcpy(s.name, "fish_id");
+        s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+        s.dtype = LIBENV_DTYPE_INT32;
+        s.shape[0] = 20;
+        s.ndim = 1,
+        s.low.int32 = 0;
+        s.high.int32 = INT32_MAX;
+        info_types.push_back(s);
+    }
+      {
+          struct libenv_tensortype s;
+          strcpy(s.name, "agent_pos");
+          s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
+          s.dtype = LIBENV_DTYPE_FLOAT32;
+          s.shape[0] = 3;
+          s.ndim = 1,
+          s.low.float32 = 0.25f;
+          s.high.float32 = 2.0f;
+          info_types.push_back(s);
+      }
     }
     // } else if (env_name == "ecoinrun") {
     //   {
@@ -450,25 +520,26 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
     //   }
     // }
 
-    if (env_name == "heist" || env_name[0] == 'e'){
-      {
-          struct libenv_tensortype s;
-          strcpy(s.name, "agent_pos");
-          s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
-          s.dtype = LIBENV_DTYPE_INT32;
-          s.shape[0] = 2;
-          s.ndim = 1,
-          s.low.int32 = 0;
-          s.high.int32 = INT32_MAX;
-          info_types.push_back(s);
-      }
-    }
+    // if (env_name == "heist" || env_name[0] == 'e'){
+    //   {
+    //       struct libenv_tensortype s;
+    //       strcpy(s.name, "agent_pos");
+    //       s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+    //       s.dtype = LIBENV_DTYPE_INT32;
+    //       s.shape[0] = 2;
+    //       s.ndim = 1,
+    //       s.low.int32 = 0;
+    //       s.high.int32 = INT32_MAX;
+    //       info_types.push_back(s);
+    //   }
+    // }
 
 
     RandGen game_level_seed_gen;
     game_level_seed_gen.seed(rand_seed);
 
     std::map<std::string, int> info_name_to_offset;
+
     for (size_t i = 0; i < info_types.size(); i++) {
         info_name_to_offset[info_types[i].name] = i;
     }
