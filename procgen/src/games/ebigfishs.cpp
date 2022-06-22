@@ -8,7 +8,7 @@ const std::string NAME = "ebigfishs";
 
 const int COMPLETION_BONUS = 10.0f;
 const int POSITIVE_REWARD = 1.0f;
-const float PENALTY_PER_STEP = -0.005;
+const float PENALTY_PER_STEP = -0.0005;
 
 const int FISH = 2;
 
