@@ -19,7 +19,7 @@ const int FISH_QUOTA = 30;
 
 const int UNDEFINED_POSITION = 0;
 
-const bool SINGLE_FISH = true;
+const bool SINGLE_FISH = false;
 // const bool FISH_SMALLER_THAN_AGENT = false;
 
 class EBigFishS : public BasicAbstractGame {

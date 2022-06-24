@@ -107,4 +107,10 @@ venv.bak/
 .build/
 
 #Logs
-.logs
+.logs/
+
+#Models
+.models/
+
+#Videos
+./videos/

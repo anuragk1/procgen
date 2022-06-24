@@ -6,7 +6,7 @@ import os
 from stable_baselines3 import PPO, A2C
 from stable_baselines3.common.vec_env import VecExtractDictObs, VecMonitor
 
-models_dir = "models/PPO_SingleFish_2/"
+models_dir = "models/PPO_MultipleFish_0.5/"
 logdir = "logs"
 
 if not os.path.exists(models_dir):
@@ -22,8 +22,8 @@ env = VecMonitor(venv=env)
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=logdir, device='cuda')
 
-TIMESTEPS = 2000000
-model.learn(total_timesteps=TIMESTEPS, tb_log_name="PPO_2")
+TIMESTEPS = 500000
+model.learn(total_timesteps=TIMESTEPS, tb_log_name="PPO_MultipleFish_0.5")
 model.save(models_dir)
 # iters = 0
 # for i in range(50):

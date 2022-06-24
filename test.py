@@ -1,22 +1,17 @@
 from procgen import ProcgenEnv, ProcgenGym3Env
 from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import VecMonitor, VecVideoRecorder
 import gym3
 import numpy as np
 
 env_name = "ebigfishs"
 
-# class RenderingEnv(gym3.ViewerWrapper):
-#     def __init__(self, env_name):
-#         env = ProcgenGym3Env(num=1, env_name=env_name, render_mode="rgb_array")
-#         super().__init__(env, info_key="rgb")
-
-#     def render(self):
-#         self.env.render()
-
-# env = RenderingEnv(env_name=env_name)
-
 env = ProcgenEnv(num_envs=1, env_name=env_name, render_mode="rgb_array")
-model = PPO.load("models/PPO_SingleFish_2/PPO_SingleFish_2.zip", env=env)
+env = VecMonitor(venv=env, filename=None,)
+# env = VecVideoRecorder(venv=env, video_folder="./", record_video_trigger=lambda x: x == 0, video_length=5000, name_prefix='PPO_SingleFish_2')
+env = VecVideoRecorder(venv=env, video_folder="./", record_video_trigger=lambda x: x == 0, video_length=5000, name_prefix='PPO_MultipleFish_0.5')
+# model = PPO.load("models/PPO_SingleFish_2/PPO_SingleFish_2.zip", env=env)
+model = PPO.load("models/PPO_MultipleFish_0.5/PPO_MultipleFish_0.5_2", env=env)
 
 episodes = 5
 for i in range(episodes):
