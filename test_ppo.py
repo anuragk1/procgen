@@ -31,7 +31,7 @@ envs = VecPyTorch(envs, device)
 envs = VecVideoRecorder(envs, f'videos/{experiment_name}', record_video_trigger=lambda x: x == 0, video_length=6000,)
 
 agent = Agent(envs=envs).to(device=device)
-agent.load_state_dict(torch.load("models/train_ppo"))
+agent.load_state_dict(torch.load("models/train_ppo_euclidean_rewards"))
 agent.eval()
 
 episodes = 5

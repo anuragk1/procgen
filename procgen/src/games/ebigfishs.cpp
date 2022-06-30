@@ -8,7 +8,7 @@ const std::string NAME = "ebigfishs";
 
 const int COMPLETION_BONUS = 10.0f;
 const int POSITIVE_REWARD = 1.0f;
-const float PENALTY_PER_STEP = -0.0005;
+const float PENALTY_PER_STEP = -0.005;
 
 const int FISH = 2;
 
@@ -81,7 +81,10 @@ class EBigFishS : public BasicAbstractGame {
 
         agent->rx = start_r;
         agent->ry = start_r;
-        agent->y = 1 + agent->ry;
+        // change location to center 
+        agent->x = float(main_width/2) + rand_gen.randrange(float(-main_width/5), float(main_width/5));
+        agent->y = float(main_height/2) + rand_gen.randrange(float(-main_height/5), float(main_height/5));
+        // agent->y = 1 + agent->ry;
 
         for (int c = 0 ; c < 20; c++) {
         //   set_ID("fish_id", 0, c);
@@ -91,7 +94,14 @@ class EBigFishS : public BasicAbstractGame {
 
     void game_step() override {
         BasicAbstractGame::game_step();
-        step_data.reward += PENALTY_PER_STEP;
+        float step_reward;
+        for (int i = 0; i < (int)entities.size(); i++) {
+            auto ent = entities[i];
+            if (ent->type == FISH){
+                step_reward = get_reward(agent->x, agent->y, ent->x, ent->y);
+            }
+        }
+        step_data.reward += step_reward;
 
         if (SINGLE_FISH) spawn_single_fish();
         else {
@@ -127,6 +137,15 @@ class EBigFishS : public BasicAbstractGame {
         choose_random_theme(ent);
         match_aspect_ratio(ent);
         ent->is_reflected = !moves_right;
+    }
+
+    float get_reward(float agent_x, float agent_y, float fish_x, float fish_y){
+        // A reward function that is inversely proportional to the Euclidean distance
+        float distance = std::sqrt(std::pow(agent_x - fish_x, 2) + std::pow(agent_y - fish_y, 2));
+        float scale = -1/(28.28*100); // maximum posible distance = 28.28
+        // float reward = std::clamp(distance * scale, -0.0005f, -0.1f);
+        // return reward;
+        return distance * scale;
     }
 
     void serialize(WriteBuffer *b) override {
@@ -180,6 +199,7 @@ class EBigFishS : public BasicAbstractGame {
                     set_ID("fish_id", ent->get_id(), fish_alive);
                     set_pos_array("fish_pos", ent->x, ent->y, ent->rx, fish_alive);
                 }
+                // std::cout << "Euclidean Reward" << get_reward(agent->x, agent->y, ent->x, ent->y) << std::endl; 
                 fish_alive++;
             }
         }
