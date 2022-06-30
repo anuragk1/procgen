@@ -63,6 +63,7 @@ class Game {
   public:
     const std::string game_name;
     std::map<std::string, int> info_name_to_offset;
+    std::map<std::string, int> obs_name_to_offset;
 
     GameOptions options;
 

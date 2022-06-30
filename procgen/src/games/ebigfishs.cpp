@@ -88,7 +88,7 @@ class EBigFishS : public BasicAbstractGame {
 
         for (int c = 0 ; c < 20; c++) {
         //   set_ID("fish_id", 0, c);
-          set_pos_array("fish_pos", UNDEFINED_POSITION, UNDEFINED_POSITION, UNDEFINED_POSITION, c);
+          set_pos_array("fish_pos", UNDEFINED_POSITION, UNDEFINED_POSITION, c);
         }
     }
 
@@ -160,53 +160,61 @@ class EBigFishS : public BasicAbstractGame {
         r_inc = b->read_float();
     }
 
-  
-    void set_pos_array(const std::string & name, float_t x, float_t y, float_t rx, int32_t c){
+    //Remove radius parameter for now 
+    void set_pos_array(const std::string & name, float_t x, float_t y, int32_t c){
         float_t *data = (float_t *)(info_bufs[info_name_to_offset.at(name)]);
-        data[c*3+0] = x;
-        data[c*3+1] = y;
-        data[c*3+2] = rx;
+        data[c*2+0] = x;
+        data[c*2+1] = y;
+        // data[c*3+2] = rx;
     }
 
-    void set_ID(const std::string & name, int32_t id, int32_t c){
-        int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at(name)]);
-        data[c] = id;
-    }
+    // void set_ID(const std::string & name, int32_t id, int32_t c){
+    //     int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at(name)]);
+    //     data[c] = id;
+    // }
 
-    void set_pos(const std::string & name, float_t x, float_t y, float_t rx){
-        int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at(name)]);
-        data[0] = x;
-        data[1] = y;
-        data[2] = rx;
-    }
+    // void set_pos(const std::string & name, float_t x, float_t y, float_t rx){
+    //     int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at(name)]);
+    //     data[0] = x;
+    //     data[1] = y;
+    //     data[2] = rx;
+    // }
 
     void observe() override {
         Game::observe();
 
-        float_t *data = (float *)(info_bufs[info_name_to_offset.at("agent_pos")]);
+        float_t *data = (float *)(obs_bufs[obs_name_to_offset.at("positions")]);
         data[0] = agent->x;
         data[1] = agent->y;
-        data[2] = agent->rx;
+        // data[2] = agent->rx;
         
         int32_t fish_count = (int)entities.size() - 1;
         *(int32_t *)(info_bufs[info_name_to_offset.at("fish_count")]) = fish_count;
         int32_t fish_alive = 0;
 
-        for (int i = 0; i < (int)entities.size(); i++) {
-            auto ent = entities[i];
-            if (ent->type == FISH) {
-                if (ent->x > 0 && ent->x < main_width){
-                    set_ID("fish_id", ent->get_id(), fish_alive);
-                    set_pos_array("fish_pos", ent->x, ent->y, ent->rx, fish_alive);
-                }
-                // std::cout << "Euclidean Reward" << get_reward(agent->x, agent->y, ent->x, ent->y) << std::endl; 
-                fish_alive++;
-            }
+        if (fish_count == 1){
+            data[2] = entities[fish_count]->x;
+            data[3] = entities[fish_count]->y;
+        } else {
+            data[2] = UNDEFINED_POSITION;
+            data[3] = UNDEFINED_POSITION;
         }
-        for (int i = fish_alive; i < (int)entities.size(); i++){
-            set_ID("fish_id", 0, fish_alive);
-            set_pos_array("fish_pos", UNDEFINED_POSITION, UNDEFINED_POSITION, UNDEFINED_POSITION, fish_alive); 
-        }
+
+
+        // for (int i = 1; i < (int)entities.size(); i++) {
+        //     auto ent = entities[i];
+        //     if (ent->type == FISH) {
+        //         if (ent->x > 0 && ent->x < main_width){
+        //             // set_ID("fish_id", ent->get_id(), fish_alive);
+        //             set_pos_array("positions", ent->x, ent->y, fish_alive);
+        //         }
+        //         fish_alive++;
+        //     }
+        // }
+        // for (int i = fish_alive; i < (int)entities.size(); i++){
+        //     // set_ID("fish_id", 0, fish_alive);
+        //     set_pos_array("fish_pos", UNDEFINED_POSITION, UNDEFINED_POSITION, fish_alive); 
+        // }
     }
 };
 

@@ -461,19 +461,19 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
           info_types.push_back(s);
       }
     } else if (env_name.substr(0,8) == "ebigfish") {
-        {
-          struct libenv_tensortype s; // table of all fish
-          strcpy(s.name, "fish_pos");
-          s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
-          s.dtype = LIBENV_DTYPE_FLOAT32;
-          s.shape[0] = 20; // Max possible fish 20
-          s.shape[1] = 3;
-          s.ndim = 2,
-          s.low.float32 = 0.25f;
-          s.high.float32 = 2.0f;
-          info_types.push_back(s);
-      }
-      {
+    {
+        struct libenv_tensortype s; // table of all fish
+        strcpy(s.name, "fish_pos");
+        s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
+        s.dtype = LIBENV_DTYPE_FLOAT32;
+        s.shape[0] = 20; // Max possible fish 20
+        s.shape[1] = 3;
+        s.ndim = 2,
+        s.low.float32 = 0.25f;
+        s.high.float32 = 2.0f;
+        info_types.push_back(s);
+    }
+    {
         struct libenv_tensortype s;
         strcpy(s.name, "fish_count");
         s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
@@ -494,17 +494,29 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
         s.high.int32 = INT32_MAX;
         info_types.push_back(s);
     }
-      {
-          struct libenv_tensortype s;
-          strcpy(s.name, "agent_pos");
-          s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
-          s.dtype = LIBENV_DTYPE_FLOAT32;
-          s.shape[0] = 3;
-          s.ndim = 1,
-          s.low.float32 = 0.25f;
-          s.high.float32 = 2.0f;
-          info_types.push_back(s);
-      }
+    // {
+    //     struct libenv_tensortype s;
+    //     strcpy(s.name, "agent_pos");
+    //     s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
+    //     s.dtype = LIBENV_DTYPE_FLOAT32;
+    //     s.shape[0] = 3;
+    //     s.ndim = 1,
+    //     s.low.float32 = 0.25f;
+    //     s.high.float32 = 2.0f;
+    //     observation_types.push_back(s);
+    // }
+    {
+        struct libenv_tensortype s;
+        strcpy(s.name, "positions");
+        s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
+        s.dtype = LIBENV_DTYPE_FLOAT32;
+        s.shape[0] = 2;
+        s.shape[1] = 2;
+        s.ndim = 2;
+        s.low.float32 = 0.25f;
+        s.high.float32 = 2.0f;
+        observation_types.push_back(s);
+    }
     }
     // } else if (env_name == "ecoinrun") {
     //   {
@@ -539,9 +551,14 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
     game_level_seed_gen.seed(rand_seed);
 
     std::map<std::string, int> info_name_to_offset;
+    std::map<std::string, int> obs_name_to_offset;
 
     for (size_t i = 0; i < info_types.size(); i++) {
         info_name_to_offset[info_types[i].name] = i;
+    }
+
+    for (size_t i = 0; i < observation_types.size(); i++) {
+        obs_name_to_offset[observation_types[i].name] = i;
     }
 
     for (int n = 0; n < num_envs; n++) {
@@ -556,6 +573,7 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
         games[n]->is_waiting_for_step = false;
         games[n]->parse_options(name, opts);
         games[n]->info_name_to_offset = info_name_to_offset;
+        games[n]->obs_name_to_offset = obs_name_to_offset;
 
         // Auto-selected a fixed_asset_seed if one wasn't specified on
         // construction
