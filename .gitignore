@@ -107,10 +107,10 @@ venv.bak/
 .build/
 
 #Logs
-.logs/
-
-#Models
-.models/
+logs/
+runs/
 
 #Videos
-.videos/
+videos/
+
+.vscode
