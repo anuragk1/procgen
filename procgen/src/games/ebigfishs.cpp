@@ -94,14 +94,23 @@ class EBigFishS : public BasicAbstractGame {
 
     void game_step() override {
         BasicAbstractGame::game_step();
-        float step_reward;
-        for (int i = 0; i < (int)entities.size(); i++) {
-            auto ent = entities[i];
-            if (ent->type == FISH){
-                step_reward = get_reward(agent->x, agent->y, ent->x, ent->y);
-            }
-        }
-        step_data.reward += step_reward;
+        float_t *data = (float *)(obs_bufs[obs_name_to_offset.at("positions")]);
+        data[0] = agent->x;
+        data[1] = agent->y;
+        // data[2] = agent->rx;
+        
+        int32_t fish_count = (int)entities.size() - 1;
+        *(int32_t *)(info_bufs[info_name_to_offset.at("fish_count")]) = fish_count;
+        int32_t fish_alive = 0;
+
+        // if (fish_count == 1){
+        data[2] = entities[fish_count]->x;
+        data[3] = entities[fish_count]->y;
+        // } else {
+        //     data[2] = UNDEFINED_POSITION;
+        //     data[3] = UNDEFINED_POSITION;
+        // }
+        step_data.reward += get_reward(data[0], data[1], data[2], data[3]);
 
         if (SINGLE_FISH) spawn_single_fish();
         else {
@@ -126,9 +135,10 @@ class EBigFishS : public BasicAbstractGame {
     
     void spawn_fish(){
         float ent_r = (FISH_MAX_R - FISH_MIN_R) * pow(rand_gen.rand01(), 1.4) + FISH_MIN_R;
-        float agent_size = agent->rx;
-        ent_r = std::min(ent_r, agent_size - r_inc);
+        // float agent_size = agent->rx;
+        ent_r = std::min(ent_r, agent->rx - r_inc);
         float ent_y = rand_gen.rand01() * (main_height - 2 * ent_r);
+        ent_y = std::clamp(ent_y, agent->y - main_height/4, agent->y + main_height/4);
         float moves_right = rand_gen.rand01() < .5;
         float ent_vx = (.15 + rand_gen.rand01() * .25) * (moves_right ? 1 : -1);
         float ent_x = moves_right ? -1 * ent_r : main_width + ent_r;
@@ -183,23 +193,31 @@ class EBigFishS : public BasicAbstractGame {
     void observe() override {
         Game::observe();
 
-        float_t *data = (float *)(obs_bufs[obs_name_to_offset.at("positions")]);
-        data[0] = agent->x;
-        data[1] = agent->y;
-        // data[2] = agent->rx;
+        // float_t *data = (float *)(obs_bufs[obs_name_to_offset.at("positions")]);
+        // data[0] = agent->x;
+        // data[1] = agent->y;
+        // // data[2] = agent->rx;
         
-        int32_t fish_count = (int)entities.size() - 1;
-        *(int32_t *)(info_bufs[info_name_to_offset.at("fish_count")]) = fish_count;
-        int32_t fish_alive = 0;
+        // int32_t fish_count = (int)entities.size() - 1;
+        // *(int32_t *)(info_bufs[info_name_to_offset.at("fish_count")]) = fish_count;
+        // int32_t fish_alive = 0;
 
-        if (fish_count == 1){
-            data[2] = entities[fish_count]->x;
-            data[3] = entities[fish_count]->y;
-        } else {
-            data[2] = UNDEFINED_POSITION;
-            data[3] = UNDEFINED_POSITION;
-        }
+        // if (fish_count == 1){
+        //     data[2] = entities[fish_count]->x;
+        //     data[3] = entities[fish_count]->y;
+        // } else {
+        //     data[2] = UNDEFINED_POSITION;
+        //     data[3] = UNDEFINED_POSITION;
+        // }
 
+        // float step_reward = get_reward(data[0], data[1], data[2], data[3]);
+        // for (int i = 0; i < (int)entities.size(); i++) {
+        //     auto ent = entities[i];
+        //     if (ent->type == FISH){
+        //         step_reward = get_reward(agent->x, agent->y, ent->x, ent->y);
+        //     }
+        // }
+        // step_data.reward += step_reward;
 
         // for (int i = 1; i < (int)entities.size(); i++) {
         //     auto ent = entities[i];

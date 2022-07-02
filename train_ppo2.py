@@ -1,24 +1,18 @@
-# IMPORTS
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
-import argparse
-from distutils.util import strtobool
 import numpy as np
-import gym
 from procgen import ProcgenEnv
-from gym.wrappers import TimeLimit, Monitor
 from gym.spaces import Discrete, Box, MultiBinary, MultiDiscrete, Space
 import time
 import random
 import os
-from stable_baselines3.common.vec_env import VecNormalize, VecVideoRecorder
-from utils.wrappers import VecPyTorch, VecExtractDictObs, VecMonitor
-from utils.agent import CNNAgent
+from stable_baselines3.common.vec_env import VecNormalize, VecVideoRecorder, VecFrameStack, VecExtractDictObs, VecMonitor
+from utils.wrappers import VecPyTorch#, VecExtractDictObs, VecMonitor
+from utils.agent import CNNAgent, MLPAgent
 
-# HYPERPARAMETERs
 exp_name = os.path.basename(__file__).rstrip(".py")
 gym_id = "ebigfishs"
 learning_rate = 2.5e-4
@@ -32,7 +26,7 @@ save_path = f"models/{exp_name}"
 
 num_minibatches = 8
 num_envs = 64
-num_steps = 256 # the number of steps per game environment
+num_steps = 256*4*6 # the number of steps per game environment
 gamma = 0.999
 gae_lambda = 0.95
 ent_coef = 0.01
@@ -56,28 +50,31 @@ minibatch_size = int(batch_size // num_minibatches)
 
 experiment_name = f"{gym_id}__{exp_name}__{seed}__{int(time.time())}"
 writer = SummaryWriter(f"runs/{experiment_name}")
-# writer.add_text('hyperparameters', "|param|value|\n|-|-|\n%s" % ('\n'.join([f"|{key}|{value}|" for key, value in vars(args).items()])))
 
 device = torch.device('cuda' if torch.cuda.is_available() and cuda else 'cpu')
 random.seed(seed)
 torch.manual_seed(seed)
 torch.backends.cudnn.deterministic = torch_deterministic
+
 venv = ProcgenEnv(num_envs=num_envs, env_name=gym_id, num_levels=0, start_level=0, distribution_mode='hard')
-venv = VecExtractDictObs(venv, "rgb")
+venv = VecExtractDictObs(venv, "positions")
 venv = VecMonitor(venv=venv)
 envs = VecNormalize(venv=venv, norm_obs=False)
 envs = VecPyTorch(envs, device)
 if capture_video:
     envs = VecVideoRecorder(envs, f'videos/{experiment_name}', 
-                            record_video_trigger=lambda x: x % 1000000== 0, video_length=600)
+                            record_video_trigger=lambda x: x % 1000000== 0, video_length=6000)
+
 assert isinstance(envs.action_space, Discrete), "only discrete action space is supported"
 
-agent = CNNAgent(envs).to(device)
+agent = MLPAgent(envs=envs).to(device)
 optimizer = optim.Adam(agent.parameters(), lr=learning_rate, eps=1e-5)
 if anneal_lr:
     lr = lambda f: f * learning_rate
 
-obs = torch.zeros((num_steps, num_envs) + envs.observation_space.shape).to(device)
+obs_space_flat = np.array(envs.observation_space.shape).prod()
+
+obs = torch.zeros((num_steps, num_envs, obs_space_flat)).to(device)
 actions = torch.zeros((num_steps, num_envs) + envs.action_space.shape).to(device)
 logprobs = torch.zeros((num_steps, num_envs)).to(device)
 rewards = torch.zeros((num_steps, num_envs)).to(device)
@@ -88,6 +85,7 @@ global_step = 0
 start_time = time.time()
 
 next_obs = envs.reset()
+next_obs = next_obs.view(64, np.array(envs.observation_space.shape).prod())
 next_done = torch.zeros(num_envs).to(device)
 num_updates = int(total_timesteps // batch_size)
 
@@ -110,6 +108,7 @@ for update in range(1, num_updates+1):
         logprobs[step] = logproba
 
         next_obs, rs, ds, infos = envs.step(action)
+        next_obs = next_obs.view(64, obs_space_flat)
         rewards[step], next_done = rs.view(-1), torch.Tensor(ds).to(device)
 
         for info in infos:
@@ -145,14 +144,14 @@ for update in range(1, num_updates+1):
                 returns[t] = rewards[t] + gamma * nextnonterminal * next_return
             advantages = returns - values
 
-    b_obs = obs.reshape((-1,)+envs.observation_space.shape)
+    b_obs = obs.reshape((num_steps*num_envs,obs_space_flat))
     b_logprobs = logprobs.reshape(-1)
     b_actions = actions.reshape((-1,)+envs.action_space.shape)
     b_advantages = advantages.reshape(-1)
     b_returns = returns.reshape(-1)
     b_values = values.reshape(-1)
 
-    target_agent = CNNAgent(envs).to(device)
+    target_agent = MLPAgent(envs).to(device)
     inds = np.arange(batch_size,)
 
     for i_epoch_pi in range(update_epochs):

@@ -16,9 +16,38 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     torch.nn.init.constant_(layer.bias, bias_const)
     return layer
 
-class Agent(nn.Module):
+class MLPAgent(nn.Module):
+    def __init__(self, envs):
+        super(MLPAgent, self).__init__()
+        self.network = nn.Sequential(
+            layer_init(nn.Linear(4, 64)),
+            nn.ReLU(),
+            layer_init(nn.Linear(64, 64)),
+            nn.ReLU(),
+            layer_init(nn.Linear(64, 64)),
+            nn.ReLU(),
+            layer_init(nn.Linear(64, 32)),
+            nn.ReLU()
+        )
+        self.actor = layer_init(nn.Linear(32, envs.action_space.n), std=0.01)
+        self.critic = layer_init(nn.Linear(32, 1), std=1)
+
+    def forward(self, x):
+        return self.network(x) 
+
+    def get_action(self, x, action=None):
+        logits = self.actor(self.forward(x))
+        probs = Categorical(logits=logits)
+        if action is None:
+            action = probs.sample()
+        return action, probs.log_prob(action), probs.entropy()
+
+    def get_value(self, x):
+        return self.critic(self.forward(x))
+
+class CNNAgent(nn.Module):
     def __init__(self, envs, channels=3):
-        super(Agent, self).__init__()
+        super(CNNAgent, self).__init__()
         self.network = nn.Sequential(
             Scale(1/255),
             layer_init(nn.Conv2d(channels, 32, 4, stride=3)),
