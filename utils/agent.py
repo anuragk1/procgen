@@ -20,7 +20,7 @@ class MLPAgent(nn.Module):
     def __init__(self, envs):
         super(MLPAgent, self).__init__()
         self.network = nn.Sequential(
-            layer_init(nn.Linear(4, 64)),
+            layer_init(nn.Linear(np.array(envs.observation_space.shape).prod(), 64)),
             nn.ReLU(),
             layer_init(nn.Linear(64, 64)),
             nn.ReLU(),

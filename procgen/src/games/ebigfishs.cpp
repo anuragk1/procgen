@@ -29,7 +29,7 @@ class EBigFishS : public BasicAbstractGame {
 
     EBigFishS()
         : BasicAbstractGame(NAME) {
-        timeout = 6000;
+        timeout = 3000;
 
         main_width = 20;
         main_height = 20;
@@ -111,6 +111,7 @@ class EBigFishS : public BasicAbstractGame {
         //     data[3] = UNDEFINED_POSITION;
         // }
         step_data.reward += get_reward(data[0], data[1], data[2], data[3]);
+        // step_data.reward += PENALTY_PER_STEP;
 
         if (SINGLE_FISH) spawn_single_fish();
         else {
@@ -138,7 +139,7 @@ class EBigFishS : public BasicAbstractGame {
         // float agent_size = agent->rx;
         ent_r = std::min(ent_r, agent->rx - r_inc);
         float ent_y = rand_gen.rand01() * (main_height - 2 * ent_r);
-        ent_y = std::clamp(ent_y, agent->y - main_height/4, agent->y + main_height/4);
+        ent_y = std::clamp(ent_y, agent->y - main_height/8, agent->y + main_height/8);
         float moves_right = rand_gen.rand01() < .5;
         float ent_vx = (.15 + rand_gen.rand01() * .25) * (moves_right ? 1 : -1);
         float ent_x = moves_right ? -1 * ent_r : main_width + ent_r;
@@ -151,7 +152,7 @@ class EBigFishS : public BasicAbstractGame {
 
     float get_reward(float agent_x, float agent_y, float fish_x, float fish_y){
         // A reward function that is inversely proportional to the Euclidean distance
-        float distance = std::sqrt(std::pow(agent_x - fish_x, 2) + std::pow(agent_y - fish_y, 2));
+        float distance = std::sqrt(4*std::pow(agent_x - fish_x, 2) + 15*std::pow(agent_y - fish_y, 2));
         float scale = -1/(28.28*100); // maximum posible distance = 28.28
         // float reward = std::clamp(distance * scale, -0.0005f, -0.1f);
         // return reward;

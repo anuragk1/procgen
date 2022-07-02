@@ -25,10 +25,11 @@ torch.manual_seed(seed)
 torch.backends.cudnn.deterministic = torch_deterministic
 venv = ProcgenEnv(num_envs=num_envs, env_name=gym_id, num_levels=0, start_level=0, distribution_mode='hard')
 venv = VecExtractDictObs(venv, "positions")
+venv = VecFrameStack(venv, n_stack=4)
 venv = VecMonitor(venv=venv)
 envs = VecNormalize(venv=venv, norm_obs=False)
 envs = VecPyTorch(envs, device)
-envs = VecVideoRecorder(envs, f'videos/{experiment_name}', record_video_trigger=lambda x: x == 0, video_length=6000,)
+envs = VecVideoRecorder(envs, f'videos/{experiment_name}', record_video_trigger=lambda x: x == 0, video_length=3000,)
 
 agent = MLPAgent(envs=envs).to(device=device)
 agent.load_state_dict(torch.load("models/train_ppo2"))
@@ -37,14 +38,14 @@ agent.eval()
 episodes = 5
 for i in range(episodes):
     obs = envs.reset()
-    obs = obs.view(1, 4)
+    obs = obs.view(1, np.array(envs.observation_space.shape).prod())
     total_reward = 0
     done = False
     while not done:
         envs.render(mode="rgb_array")
         action, _, _ = agent.get_action(obs)
         obs, reward, done, info = envs.step(action)
-        obs = obs.view(1, 4)
+        obs = obs.view(1, np.array(envs.observation_space.shape).prod())
         total_reward += reward
 
     print(f"Total Reward: {total_reward}")

@@ -17,15 +17,15 @@ exp_name = os.path.basename(__file__).rstrip(".py")
 gym_id = "ebigfishs"
 learning_rate = 2.5e-4
 seed = 1
-total_timesteps = int(1e7)
+total_timesteps = int(1e6)
 torch_deterministic = True
 cuda = True
 prod_mode = False
-capture_video = True
+capture_video = False
 save_path = f"models/{exp_name}"
 
 num_minibatches = 8
-num_envs = 64
+num_envs = 64 * 2
 num_steps = 256*4*6 # the number of steps per game environment
 gamma = 0.999
 gae_lambda = 0.95
@@ -58,6 +58,7 @@ torch.backends.cudnn.deterministic = torch_deterministic
 
 venv = ProcgenEnv(num_envs=num_envs, env_name=gym_id, num_levels=0, start_level=0, distribution_mode='hard')
 venv = VecExtractDictObs(venv, "positions")
+venv = VecFrameStack(venv, n_stack=4)
 venv = VecMonitor(venv=venv)
 envs = VecNormalize(venv=venv, norm_obs=False)
 envs = VecPyTorch(envs, device)
@@ -85,7 +86,7 @@ global_step = 0
 start_time = time.time()
 
 next_obs = envs.reset()
-next_obs = next_obs.view(64, np.array(envs.observation_space.shape).prod())
+next_obs = next_obs.view(num_envs, np.array(envs.observation_space.shape).prod())
 next_done = torch.zeros(num_envs).to(device)
 num_updates = int(total_timesteps // batch_size)
 
@@ -108,7 +109,7 @@ for update in range(1, num_updates+1):
         logprobs[step] = logproba
 
         next_obs, rs, ds, infos = envs.step(action)
-        next_obs = next_obs.view(64, obs_space_flat)
+        next_obs = next_obs.view(num_envs, obs_space_flat)
         rewards[step], next_done = rs.view(-1), torch.Tensor(ds).to(device)
 
         for info in infos:
