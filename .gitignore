@@ -114,3 +114,6 @@ runs/
 videos/
 
 .vscode
+
+#WandB logs
+wandb/

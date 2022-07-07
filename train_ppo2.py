@@ -15,27 +15,29 @@ from utils.agent import CNNAgent, MLPAgent
 
 exp_name = os.path.basename(__file__).rstrip(".py")
 gym_id = "ebigfishs"
-learning_rate = 2.5e-4
+learning_rate = 1e-5
 seed = 1
-total_timesteps = int(1e6)
+total_timesteps = int(1e6*5)
 torch_deterministic = True
 cuda = True
 prod_mode = False
+wandb_proj_name = "AttRL"
+wandb_entity = None
 capture_video = False
 save_path = f"models/{exp_name}"
 
-num_minibatches = 8
-num_envs = 64 * 2
-num_steps = 256*4*6 # the number of steps per game environment
-gamma = 0.999
+num_minibatches = 16
+num_envs = 64 * 4
+num_steps = 256*6 # the number of steps per game environment
+gamma = 0.95
 gae_lambda = 0.95
 ent_coef = 0.01
 vf_coef = 0.5
 max_grad_norm = 0.5
 clip_coef = 0.2
 update_epochs = 3
-kle_stop = False
-kle_rollback = False
+kle_stop = True
+kle_rollback = True
 target_kl = 0.03
 gae = True
 norm_adv = True
@@ -51,6 +53,12 @@ minibatch_size = int(batch_size // num_minibatches)
 experiment_name = f"{gym_id}__{exp_name}__{seed}__{int(time.time())}"
 writer = SummaryWriter(f"runs/{experiment_name}")
 
+if prod_mode:
+    import wandb
+    wandb.init(project=wandb_proj_name, entity=wandb_entity, sync_tensorboard=True, name=experiment_name, monitor_gym=True, save_code=True)
+    writer = SummaryWriter(f"runs/{experiment_name}")
+
+
 device = torch.device('cuda' if torch.cuda.is_available() and cuda else 'cpu')
 random.seed(seed)
 torch.manual_seed(seed)
@@ -58,13 +66,13 @@ torch.backends.cudnn.deterministic = torch_deterministic
 
 venv = ProcgenEnv(num_envs=num_envs, env_name=gym_id, num_levels=0, start_level=0, distribution_mode='hard')
 venv = VecExtractDictObs(venv, "positions")
-venv = VecFrameStack(venv, n_stack=4)
+venv = VecFrameStack(venv, n_stack=2)
 venv = VecMonitor(venv=venv)
 envs = VecNormalize(venv=venv, norm_obs=False)
 envs = VecPyTorch(envs, device)
 if capture_video:
     envs = VecVideoRecorder(envs, f'videos/{experiment_name}', 
-                            record_video_trigger=lambda x: x % 1000000== 0, video_length=6000)
+                            record_video_trigger=lambda x: x % 300000 == 0, video_length=3000)
 
 assert isinstance(envs.action_space, Discrete), "only discrete action space is supported"
 

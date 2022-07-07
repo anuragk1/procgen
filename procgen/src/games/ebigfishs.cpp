@@ -6,8 +6,8 @@
  
 const std::string NAME = "ebigfishs";
 
-const int COMPLETION_BONUS = 10.0f;
-const int POSITIVE_REWARD = 1.0f;
+const int COMPLETION_BONUS = 100.0f;
+const int POSITIVE_REWARD = 10.0f;
 const float PENALTY_PER_STEP = -0.005;
 
 const int FISH = 2;
@@ -15,7 +15,7 @@ const int FISH = 2;
 const float FISH_MIN_R = .25;
 const float FISH_MAX_R = 2;
 
-const int FISH_QUOTA = 30;
+const int FISH_QUOTA = 10;
 
 const int UNDEFINED_POSITION = 0;
 
@@ -29,7 +29,7 @@ class EBigFishS : public BasicAbstractGame {
 
     EBigFishS()
         : BasicAbstractGame(NAME) {
-        timeout = 3000;
+        timeout = 1500;
 
         main_width = 20;
         main_height = 20;
@@ -71,13 +71,13 @@ class EBigFishS : public BasicAbstractGame {
         options.center_agent = false;
         fish_eaten = 0;
 
-        float start_r = .5;
+        float start_r = .90;
 
         if (options.distribution_mode == EasyMode) {
             start_r = 1;
         }
 
-        r_inc = (FISH_MAX_R - start_r) / FISH_QUOTA;
+        r_inc = (FISH_MAX_R - start_r) / (FISH_QUOTA * 3);
 
         agent->rx = start_r;
         agent->ry = start_r;
@@ -103,6 +103,11 @@ class EBigFishS : public BasicAbstractGame {
         *(int32_t *)(info_bufs[info_name_to_offset.at("fish_count")]) = fish_count;
         int32_t fish_alive = 0;
 
+        if (SINGLE_FISH) spawn_single_fish();
+        else {
+            if (rand_gen.randn(20) == 1) spawn_fish();
+        }
+
         // if (fish_count == 1){
         data[2] = entities[fish_count]->x;
         data[3] = entities[fish_count]->y;
@@ -110,13 +115,8 @@ class EBigFishS : public BasicAbstractGame {
         //     data[2] = UNDEFINED_POSITION;
         //     data[3] = UNDEFINED_POSITION;
         // }
-        step_data.reward += get_reward(data[0], data[1], data[2], data[3]);
+        step_data.reward += get_reward(data[0], data[1], data[2], data[3], entities[fish_count]->rx);
         // step_data.reward += PENALTY_PER_STEP;
-
-        if (SINGLE_FISH) spawn_single_fish();
-        else {
-            if (rand_gen.randn(20) == 1) spawn_fish();
-        }
 
         if (fish_eaten >= FISH_QUOTA) {
             step_data.done = true;
@@ -141,7 +141,8 @@ class EBigFishS : public BasicAbstractGame {
         float ent_y = rand_gen.rand01() * (main_height - 2 * ent_r);
         ent_y = std::clamp(ent_y, agent->y - main_height/8, agent->y + main_height/8);
         float moves_right = rand_gen.rand01() < .5;
-        float ent_vx = (.15 + rand_gen.rand01() * .25) * (moves_right ? 1 : -1);
+        float ent_vx = 1.5*(.15 + rand_gen.rand01() * .25) * (moves_right ? 1 : -1);
+        ent_vx = std::clamp(ent_vx, -0.30f, 0.30f);
         float ent_x = moves_right ? -1 * ent_r : main_width + ent_r;
         int type = FISH;
         auto ent = add_entity(ent_x, ent_y, ent_vx, 0, ent_r, type);
@@ -150,13 +151,22 @@ class EBigFishS : public BasicAbstractGame {
         ent->is_reflected = !moves_right;
     }
 
-    float get_reward(float agent_x, float agent_y, float fish_x, float fish_y){
+    float get_reward(float agent_x, float agent_y, float fish_x, float fish_y, float fish_rx){
         // A reward function that is inversely proportional to the Euclidean distance
-        float distance = std::sqrt(4*std::pow(agent_x - fish_x, 2) + 15*std::pow(agent_y - fish_y, 2));
-        float scale = -1/(28.28*100); // maximum posible distance = 28.28
+        float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
+        float weighted_distance = std::sqrt(10*std::abs(std::pow(agent_x - fish_x, 2)) + 25*std::abs(std::pow(agent_y - fish_y, 2)));
+        float scale = -1/(28.28*100);// -1/(28.28); // maximum posible distance = 28.28
+        float y_proximity_reward = 0.0;
+        float x_proximity_reward = 0.0;
+        float proximity_reward = 0.0;
+        if (distance < 0.5*agent->rx) proximity_reward = .05f;
+        // if (std::abs(agent_y - fish_y) < agent->rx) y_proximity_reward = 0.025f;// + 5*std::abs(agent_y - fish_y);
+        // if (std::abs(agent_x - fish_x) < agent->rx) x_proximity_reward = 0.025f + 5*std::abs(agent_x - fish_x);
         // float reward = std::clamp(distance * scale, -0.0005f, -0.1f);
+        // float reward = 1 / (0.4*distance + 1e-8) - 0.5;
+        // reward = std::clamp(reward, reward, 0.75f);
         // return reward;
-        return distance * scale;
+        return weighted_distance * scale + y_proximity_reward + x_proximity_reward + proximity_reward;
     }
 
     void serialize(WriteBuffer *b) override {
@@ -233,6 +243,12 @@ class EBigFishS : public BasicAbstractGame {
         // for (int i = fish_alive; i < (int)entities.size(); i++){
         //     // set_ID("fish_id", 0, fish_alive);
         //     set_pos_array("fish_pos", UNDEFINED_POSITION, UNDEFINED_POSITION, fish_alive); 
+        // }
+        // for (int i = 0; i < (int)entities.size(); i++){
+        //     if (entities[i]->type == FISH){
+        //     auto ent = entities[i];
+        //     std::cout << "Velocity: " <<ent->vx <<std::endl;
+        //     }
         // }
     }
 };
