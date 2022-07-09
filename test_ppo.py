@@ -26,9 +26,9 @@ venv = ProcgenEnv(num_envs=num_envs, env_name=gym_id, num_levels=0, start_level=
 venv = VecExtractDictObs(venv, "positions")
 venv = VecFrameStack(venv, n_stack=2)
 venv = VecMonitor(venv=venv)
-# envs = VecNormalize(venv=venv, norm_obs=False)
+envs = VecNormalize(venv=venv, norm_obs=False)
 envs = VecPyTorch(venv, device)
-envs = VecVideoRecorder(envs, f'videos/{experiment_name}', record_video_trigger=lambda x: x == 0, video_length=1500,)
+envs = VecVideoRecorder(envs, f'videos/{experiment_name}', record_video_trigger=lambda x: x == 0, video_length=1000,)
 
 agent = MLPAgent(envs=envs).to(device=device)
 agent.load_state_dict(torch.load("models/train_ppo2"))

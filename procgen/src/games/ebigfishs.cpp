@@ -6,8 +6,8 @@
  
 const std::string NAME = "ebigfishs";
 
-const int COMPLETION_BONUS = 10.0f;
-const int POSITIVE_REWARD = 1.0f;
+const float COMPLETION_BONUS = 10.0f;
+const float POSITIVE_REWARD = 1.0f;
 const float PENALTY_PER_STEP = -0.005;
 
 const int FISH = 2;
@@ -115,7 +115,7 @@ class EBigFishS : public BasicAbstractGame {
         //     data[2] = UNDEFINED_POSITION;
         //     data[3] = UNDEFINED_POSITION;
         // }
-        step_data.reward += get_reward(data[0], data[1], data[2], data[3], entities[fish_count]->rx);
+        step_data.reward += get_reward(data[0], data[1], data[2], data[3]);
         // step_data.reward += PENALTY_PER_STEP;
 
         if (fish_eaten >= FISH_QUOTA) {
@@ -139,7 +139,7 @@ class EBigFishS : public BasicAbstractGame {
         // float agent_size = agent->rx;
         ent_r = std::min(ent_r, agent->rx - r_inc);
         float ent_y = rand_gen.rand01() * (main_height - 2 * ent_r);
-        ent_y = std::clamp(ent_y, agent->y - main_height/8, agent->y + main_height/8);
+        // ent_y = std::clamp(ent_y, agent->y - main_height/8, agent->y + main_height/8);
         float moves_right = rand_gen.rand01() < .5;
         float ent_vx = 1.5*(.15 + rand_gen.rand01() * .25) * (moves_right ? 1 : -1);
         ent_vx = std::clamp(ent_vx, -0.30f, 0.30f);
@@ -151,7 +151,7 @@ class EBigFishS : public BasicAbstractGame {
         ent->is_reflected = !moves_right;
     }
 
-    float get_reward(float agent_x, float agent_y, float fish_x, float fish_y, float fish_rx){
+    float get_reward(float agent_x, float agent_y, float fish_x, float fish_y){
         // float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
         // float scale = -1/(28.28);// -1/(28.28); // maximum posible distance = 28.28
         // float weighted_distance = std::sqrt(10*std::abs(std::pow(agent_x - fish_x, 2)) + 25*std::abs(std::pow(agent_y - fish_y, 2)));
@@ -172,7 +172,7 @@ class EBigFishS : public BasicAbstractGame {
         float x_diff = std::abs(agent_x - fish_x);
         float y_diff = std::abs(agent_y - fish_y);
         float distance = std::sqrt(std::pow(x_diff, 2) + std::pow(y_diff, 2));
-        float reward = std::min(0.1, 0.2*(1/(distance+0.00001)))-0.015;
+        float reward = std::min(1.0, 0.5*(1/(distance+0.00001)))-0.005;
         // if (x_diff < 0.25*agent->rx) reward += 0.01;
         // if (y_diff < 0.25*agent->rx) reward += 0.01;
         // if (x_diff < 0.125*agent->rx && y_diff < 0.25*agent->rx) reward += 0.02;

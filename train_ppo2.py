@@ -17,7 +17,7 @@ exp_name = os.path.basename(__file__).rstrip(".py")
 gym_id = "ebigfishs"
 learning_rate = 2.5e-4
 seed = 1
-total_timesteps = int(1e6*5)
+total_timesteps = int(1e7*2)
 torch_deterministic = True
 cuda = True
 prod_mode = False
@@ -66,7 +66,7 @@ torch.backends.cudnn.deterministic = torch_deterministic
 
 venv = ProcgenEnv(num_envs=num_envs, env_name=gym_id, num_levels=0, start_level=0, distribution_mode='hard')
 venv = VecExtractDictObs(venv, "positions")
-# venv = VecFrameStack(venv, n_stack=2)
+venv = VecFrameStack(venv, n_stack=2)
 venv = VecMonitor(venv=venv)
 envs = VecNormalize(venv=venv, norm_obs=False)
 envs = VecPyTorch(envs, device)
