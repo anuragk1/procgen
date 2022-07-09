@@ -6,8 +6,8 @@
  
 const std::string NAME = "ebigfishs";
 
-const int COMPLETION_BONUS = 100.0f;
-const int POSITIVE_REWARD = 10.0f;
+const int COMPLETION_BONUS = 10.0f;
+const int POSITIVE_REWARD = 1.0f;
 const float PENALTY_PER_STEP = -0.005;
 
 const int FISH = 2;
@@ -29,7 +29,7 @@ class EBigFishS : public BasicAbstractGame {
 
     EBigFishS()
         : BasicAbstractGame(NAME) {
-        timeout = 1500;
+        timeout = 1000;
 
         main_width = 20;
         main_height = 20;
@@ -152,21 +152,31 @@ class EBigFishS : public BasicAbstractGame {
     }
 
     float get_reward(float agent_x, float agent_y, float fish_x, float fish_y, float fish_rx){
-        // A reward function that is inversely proportional to the Euclidean distance
-        float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
-        float weighted_distance = std::sqrt(10*std::abs(std::pow(agent_x - fish_x, 2)) + 25*std::abs(std::pow(agent_y - fish_y, 2)));
-        float scale = -1/(28.28*100);// -1/(28.28); // maximum posible distance = 28.28
-        float y_proximity_reward = 0.0;
-        float x_proximity_reward = 0.0;
-        float proximity_reward = 0.0;
-        if (distance < 0.5*agent->rx) proximity_reward = .05f;
+        // float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
+        // float scale = -1/(28.28);// -1/(28.28); // maximum posible distance = 28.28
+        // float weighted_distance = std::sqrt(10*std::abs(std::pow(agent_x - fish_x, 2)) + 25*std::abs(std::pow(agent_y - fish_y, 2)));
+        // float weighted_scale = -1/(28.28*100);// -1/(28.28); // maximum posible distance = 28.28
+        // float y_proximity_reward = 0.0;
+        // float x_proximity_reward = 0.0;
+        // float proximity_reward = 0.0;
+        // if (distance < 0.5*agent->rx) proximity_reward = .05f;
         // if (std::abs(agent_y - fish_y) < agent->rx) y_proximity_reward = 0.025f;// + 5*std::abs(agent_y - fish_y);
         // if (std::abs(agent_x - fish_x) < agent->rx) x_proximity_reward = 0.025f + 5*std::abs(agent_x - fish_x);
         // float reward = std::clamp(distance * scale, -0.0005f, -0.1f);
         // float reward = 1 / (0.4*distance + 1e-8) - 0.5;
         // reward = std::clamp(reward, reward, 0.75f);
         // return reward;
-        return weighted_distance * scale + y_proximity_reward + x_proximity_reward + proximity_reward;
+        // float reward = -0.05+0.1/(distance+0.1);
+        // return reward;
+        // return distance * scale + y_proximity_reward + x_proximity_reward + proximity_reward;
+        float x_diff = std::abs(agent_x - fish_x);
+        float y_diff = std::abs(agent_y - fish_y);
+        float distance = std::sqrt(std::pow(x_diff, 2) + std::pow(y_diff, 2));
+        float reward = std::min(0.1, 0.2*(1/(distance+0.00001)))-0.015;
+        // if (x_diff < 0.25*agent->rx) reward += 0.01;
+        // if (y_diff < 0.25*agent->rx) reward += 0.01;
+        // if (x_diff < 0.125*agent->rx && y_diff < 0.25*agent->rx) reward += 0.02;
+        return reward;
     }
 
     void serialize(WriteBuffer *b) override {

@@ -15,7 +15,7 @@ from utils.agent import CNNAgent, MLPAgent
 
 exp_name = os.path.basename(__file__).rstrip(".py")
 gym_id = "ebigfishs"
-learning_rate = 1e-5
+learning_rate = 2.5e-4
 seed = 1
 total_timesteps = int(1e6*5)
 torch_deterministic = True
@@ -28,7 +28,7 @@ save_path = f"models/{exp_name}"
 
 num_minibatches = 16
 num_envs = 64 * 4
-num_steps = 256*6 # the number of steps per game environment
+num_steps = 256 # the number of steps per game environment
 gamma = 0.95
 gae_lambda = 0.95
 ent_coef = 0.01
@@ -66,7 +66,7 @@ torch.backends.cudnn.deterministic = torch_deterministic
 
 venv = ProcgenEnv(num_envs=num_envs, env_name=gym_id, num_levels=0, start_level=0, distribution_mode='hard')
 venv = VecExtractDictObs(venv, "positions")
-venv = VecFrameStack(venv, n_stack=2)
+# venv = VecFrameStack(venv, n_stack=2)
 venv = VecMonitor(venv=venv)
 envs = VecNormalize(venv=venv, norm_obs=False)
 envs = VecPyTorch(envs, device)

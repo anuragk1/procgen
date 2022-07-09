@@ -21,7 +21,7 @@ class MLPAgent(nn.Module):
         super(MLPAgent, self).__init__()
         self.network = nn.Sequential(
             layer_init(nn.Linear(np.array(envs.observation_space.shape).prod(), 32)),
-            nn.ReLU(),
+            nn.Tanh(),
             # layer_init(nn.Linear(32, 32)),
             # nn.ReLU(),
             # layer_init(nn.Linear(64, 128)),
@@ -30,8 +30,8 @@ class MLPAgent(nn.Module):
             # nn.ReLU(),
             # layer_init(nn.Linear(128, 64)),
             # nn.ReLU(),
-            # layer_init(nn.Linear(32, 32)),
-            # nn.ReLU()
+            layer_init(nn.Linear(32, 32)),
+            nn.Tanh()
         )
         self.actor = layer_init(nn.Linear(32, envs.action_space.n), std=0.01)
         self.critic = layer_init(nn.Linear(32, 1), std=1)
