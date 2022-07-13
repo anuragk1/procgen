@@ -152,8 +152,8 @@ class EBigFishS : public BasicAbstractGame {
     }
 
     float get_reward(float agent_x, float agent_y, float fish_x, float fish_y){
-        // float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
-        // float scale = -1/(28.28);// -1/(28.28); // maximum posible distance = 28.28
+        float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
+        float scale = -1/250.0;// -1/(28.28); // maximum posible distance = 28.28
         // float weighted_distance = std::sqrt(10*std::abs(std::pow(agent_x - fish_x, 2)) + 25*std::abs(std::pow(agent_y - fish_y, 2)));
         // float weighted_scale = -1/(28.28*100);// -1/(28.28); // maximum posible distance = 28.28
         // float y_proximity_reward = 0.0;
@@ -168,15 +168,20 @@ class EBigFishS : public BasicAbstractGame {
         // return reward;
         // float reward = -0.05+0.1/(distance+0.1);
         // return reward;
-        // return distance * scale + y_proximity_reward + x_proximity_reward + proximity_reward;
-        float x_diff = std::abs(agent_x - fish_x);
-        float y_diff = std::abs(agent_y - fish_y);
-        float distance = std::sqrt(std::pow(x_diff, 2) + std::pow(y_diff, 2));
-        float reward = std::min(1.0, 0.5*(1/(distance+0.00001)))-0.005;
+        return distance * scale; // +y_proximity_reward + x_proximity_reward + proximity_reward;
+
+/*
+reward function used for 100M model that worked perfectly####
+        // float x_diff = std::abs(agent_x - fish_x);
+        // float y_diff = std::abs(agent_y - fish_y);
+        // float distance = std::sqrt(std::pow(x_diff, 2) + std::pow(y_diff, 2));
+        // float reward = std::min(1.0, 0.5*(1/(distance+0.00001)))-0.005;
+        // ####
         // if (x_diff < 0.25*agent->rx) reward += 0.01;
         // if (y_diff < 0.25*agent->rx) reward += 0.01;
         // if (x_diff < 0.125*agent->rx && y_diff < 0.25*agent->rx) reward += 0.02;
         return reward;
+*/
     }
 
     void serialize(WriteBuffer *b) override {
