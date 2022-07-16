@@ -115,7 +115,8 @@ class EBigFishS : public BasicAbstractGame {
         //     data[2] = UNDEFINED_POSITION;
         //     data[3] = UNDEFINED_POSITION;
         // }
-        step_data.reward += get_reward(data[0], data[1], data[2], data[3]);
+        step_data.reward += PENALTY_PER_STEP;
+        // step_data.reward += get_reward(data[0], data[1], data[2], data[3]);
         // step_data.reward += PENALTY_PER_STEP;
 
         if (fish_eaten >= FISH_QUOTA) {
