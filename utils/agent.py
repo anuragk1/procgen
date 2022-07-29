@@ -4,7 +4,6 @@ from torch.distributions.categorical import Categorical
 import numpy as np
 import os
 
-from zmq import device
 import utils.replay_buffer
 import utils.ppo_update
 
@@ -370,6 +369,8 @@ class DDTAgent:
             obs = torch.Tensor(observation)
             obs = obs.view(1, -1)
             self.last_state = obs
+            # print(obs)
+            # print(self.action_network.parameters)
 
             probs = self.action_network(obs)
             value_pred = self.value_network(obs)
@@ -459,3 +460,95 @@ class DDTAgent:
         new_agent.__setstate__(self.__getstate__())
         return new_agent
         
+class DDTAgentNew:
+    def __init__(self, bot_name='DDT', input_dim=4, output_dim=2, rule_list=False, num_rules=4):
+        self.bot_name = bot_name
+        self.rule_list = rule_list
+        self.output_dim = output_dim
+        self.input_dim = input_dim
+        self.num_rules = num_rules
+
+        if rule_list:
+            self.bot_name += str(num_rules)+'_rules'
+            init_weights, init_comparators, init_leaves = init_rule_list(num_rules, input_dim, output_dim)
+        else:
+            init_weights = None
+            init_comparators = None
+            init_leaves = num_rules
+            self.bot_name += str(num_rules) + '_leaves'
+
+        self.action_network = DDT(input_dim=input_dim,
+                                  output_dim=output_dim,
+                                  weights=init_weights,
+                                  comparators=init_comparators,
+                                  leaves=init_leaves,
+                                  alpha=1,
+                                  is_value=False,
+                                  use_gpu=False)
+        self.value_network = DDT(input_dim=input_dim,
+                                 output_dim=output_dim,
+                                 weights=init_weights,
+                                 comparators=init_comparators,
+                                 leaves=init_leaves,
+                                 alpha=1,
+                                 is_value=True,
+                                 use_gpu=False)
+
+        self.ppo = utils.ppo_update.PPO([self.action_network, self.value_network], two_nets=True, use_gpu=False)
+
+    def forward(self):
+        raise NotImplementedError
+    
+    def get_action(self, observation, action=None):
+        with torch.no_grad():
+            obs = torch.Tensor(observation)
+            obs = obs.view(1, -1)
+            self.last_state = obs
+            # print(obs)
+            # print(self.action_network.parameters)
+
+            probs = self.action_network(obs)
+            value_pred = self.value_network(obs)
+            probs = probs.view(-1).cpu()
+            self.full_probs = probs
+
+            if self.action_network.input_dim > 10:
+                probs, inds = torch.topk(probs, 3)
+
+            m = Categorical(probs)
+            action = m.sample()
+            log_probs = m.log_prob(action)
+            self.last_action_probs = log_probs.cpu()
+            self.last_value_pred = value_pred.view(-1).cpu()
+
+            if self.action_network.input_dim > 10:
+                self.last_action = inds[action].cpu()
+            else:
+                self.last_action = action.cpu()
+
+        if self.action_network.input_dim > 10:
+            action = inds[action].item()
+        else:
+            action = action.item()
+        return action
+
+
+        # logits = self.actor(self.forward(observation))
+        # probs = Categorical(logits=logits)
+        # if action is None:
+        #     action = probs.sample()
+        # return action, probs.log_prob(action), probs.entropy()
+
+
+    def get_value(self, observation):
+        activation = nn.ReLU()
+        last_ = nn.Linear(15, 1)
+        with torch.no_grad():
+            obs = torch.Tensor(observation)
+            obs = obs.view(1, -1)
+
+            y = self.value_network(obs)
+            value = last_(activation(y))
+        return value
+
+    

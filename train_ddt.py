@@ -29,7 +29,9 @@ def run_episode(q, agent_in, ENV_NAME, seed=0):
     np.random.seed(seed)
     # env.action_space.seed(seed)
     random.seed(seed)
+    # state = env.reset()
     state = env.reset()
+    # print(state)
 
     while not done:
         action = []
@@ -41,6 +43,20 @@ def run_episode(q, agent_in, ENV_NAME, seed=0):
         # env.render()
         # Save reward
         agent.save_reward(reward)
+        # print(f"State list shape: {agent.replay_buffer.states_list[0][0].shape}")
+        # print(f"Length of action probs list: {len(agent.replay_buffer.action_probs_list)}")
+        # print(f"Length of value list: {len(agent.replay_buffer.value_list)}")
+        # print(f"Length of hidden state list: {len(agent.replay_buffer.hidden_state_list)}")
+        # print(f"Length of rewards list: {len(agent.replay_buffer.rewards_list)}")
+        # print(f"Deepr value list: {len(agent.replay_buffer.deeper_value_list)}")
+        # print(f"Deeper action list: {len(agent.replay_buffer.deeper_action_list)}")
+        # print(f"Deeper advantage list: {len(agent.replay_buffer.deeper_advantage_list)}")
+        # print(f"Action taken list: {len(agent.replay_buffer.action_taken_list)}")
+        # print(f"Advantage list: {len(agent.replay_buffer.advantage_list)}")
+        # print(f"Full probs list: {len(agent.replay_buffer.full_probs_list)}")
+        # print(f"Length of Deeper full probs list: {len(agent.replay_buffer.deeper_full_probs_list)}")
+        # print(f"Steps: {agent.replay_buffer.step}")
+        # print("="*25)
         if done:
             break
 
@@ -57,6 +73,27 @@ def run_episode(q, agent_in, ENV_NAME, seed=0):
     agent.replay_buffer.deeper_advantage_list = deeper_advantage_list
 
     to_return = [reward_sum, copy.deepcopy(agent.replay_buffer.__getstate__())]
+
+    # print(f"State list shape: {len(agent.replay_buffer.states_list)}")
+    # print(f"Length of action probs list: {len(agent.replay_buffer.action_probs_list)}")
+    # print(f"Length of value list: {len(agent.replay_buffer.value_list)}")
+    # print(f"Length of hidden state list: {len(agent.replay_buffer.hidden_state_list)}")
+    # print(f"Length of rewards list: {len(agent.replay_buffer.rewards_list)}")
+    # print(f"Deepr value list: {len(agent.replay_buffer.deeper_value_list)}")
+    # print(f"Deeper action list: {len(agent.replay_buffer.deeper_action_list)}")
+    # print(f"Deeper action list: {agent.replay_buffer.deeper_action_list}")
+    # print(f"Deeper advantage list: {len(agent.replay_buffer.deeper_advantage_list)}")
+    # print(f"Deeper advantage list: {agent.replay_buffer.deeper_advantage_list}")
+    # print(f"Action taken list: {len(agent.replay_buffer.action_taken_list)}")
+    # print(f"Action taken list: {agent.replay_buffer.action_taken_list}")
+    # print(f"Advantage list: {len(agent.replay_buffer.advantage_list)}")
+    # print(f"Advantage list: {agent.replay_buffer.advantage_list}")
+    # print(f"Full probs list: {len(agent.replay_buffer.full_probs_list)}")
+    # print(f"Full probs list: {agent.replay_buffer.full_probs_list}")
+    # print(f"Length of Deeper full probs list: {len(agent.replay_buffer.deeper_full_probs_list)}")
+    # print(f"Length of Deeper full probs list: {agent.replay_buffer.deeper_full_probs_list}")
+    # print(f"Steps: {agent.replay_buffer.step}")
+    # print("="*25)
 
     if q is not None:
         try:
@@ -89,7 +126,7 @@ def main(episodes, agent, ENV_NAME):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--agent_type", help="architecture of agent to run", type=str, default='ddt')
-    parser.add_argument("-e", "--episodes", help="how many episodes", type=int, default=2000)
+    parser.add_argument("-e", "--episodes", help="how many episodes", type=int, default=100000)
     parser.add_argument("-l", "--num_leaves", help="number of leaves for DDT/DRL ", type=int, default=8)
     parser.add_argument("-n", "--num_hidden", help="number of hidden layers for MLP ", type=int, default=0)
     parser.add_argument("-env", "--env_type", help="environment to run on", type=str, default='cart')
@@ -125,7 +162,7 @@ if __name__ == "__main__":
     print(f"Agent {AGENT_TYPE} on {ENV_TYPE} ")
     # mp.set_start_method('spawn')
     mp.set_sharing_strategy('file_system')
-    for i in range(5):
+    for i in range(1):
         bot_name = AGENT_TYPE + ENV_TYPE
         if USE_GPU:
             bot_name += 'GPU'

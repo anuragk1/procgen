@@ -14,7 +14,8 @@ class VecPyTorch(VecEnvWrapper):
         return obs
 
     def step_async(self, actions):
-        actions = actions.cpu().numpy()
+        # actions = actions.cpu().numpy()
+        actions = np.array([actions])
         self.venv.step_async(actions)
 
     def step_wait(self):

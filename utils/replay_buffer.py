@@ -1,5 +1,4 @@
 import random
-from traceback import print_tb
 import torch
 import numpy as np
 
@@ -196,3 +195,48 @@ def discount_reward(reward, value, deeper_value):
     rewards_list = rewards.detach().clone().cpu().numpy().tolist()
     advantage_list = advantages.detach().clone().cpu().numpy().tolist()
     return rewards_list, advantage_list, deeper_advantage_list
+
+class ReplayBufferSingleAgentTensor(object):
+    def __init__(self, agent_in=None):
+        self.states_list = torch.zeros((256, 64, 8)).to(device) #num_steps=256, num_envs=64, obs_space_flat=8 
+        self.action_probs_list = torch.zeros((256, 64) + ()).to(device) #envs.action_space.shape = ()
+        self.value_list = []
+        self.hidden_state_list = []
+        self.rewards_list = []
+        self.deeper_value_list = []
+        self.deeper_action_list = []
+        self.deeper_advantage_list = []
+        self.action_taken_list = []
+        self.advantage_list = []
+        self.full_probs_list = []
+        self.deeper_full_probs_list = []
+        self.step = -1
+    
+    def __getstate__(self):
+        raise NotImplementedError
+
+    def __setstate__(self, state):
+        raise NotImplementedError
+
+    def extend(self, state):
+        raise NotImplementedError
+
+    def insert(self,
+               obs=None,
+               recurrent_hidden_states=None,
+               action_log_probs=None,
+               value_preds=None,
+               deeper_action_log_probs=None,
+               deeper_value_pred=None,
+               last_action=None,
+               full_probs_vector=None,
+               deeper_full_probs_vector=None,
+               rewards=None):
+        raise NotImplementedError
+
+    def clear(self):
+        raise NotImplementedError
+
+    def sample(self):
+        raise NotImplementedError
+
