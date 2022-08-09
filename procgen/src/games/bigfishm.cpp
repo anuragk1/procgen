@@ -4,7 +4,7 @@
 #include <queue>
 
  
-const std::string NAME = "ebigfishl";
+const std::string NAME = "bigfishm";
 
 const int COMPLETION_BONUS = 10.0f;
 const int POSITIVE_REWARD = 1.0f;
@@ -22,12 +22,12 @@ const int UNDEFINED_POSITION = 0;
 const bool SINGLE_FISH = true;
 // const bool FISH_SMALLER_THAN_AGENT = false;
 
-class EBigFishL : public BasicAbstractGame {
+class BigFishM : public BasicAbstractGame {
   public:
     int fish_eaten = 0;
     float r_inc = 0.0;
 
-    EBigFishL()
+    BigFishM()
         : BasicAbstractGame(NAME) {
         timeout = 500;
 
@@ -94,22 +94,54 @@ class EBigFishL : public BasicAbstractGame {
     void game_step() override {
         BasicAbstractGame::game_step();
         float_t *data = (float *)(obs_bufs[obs_name_to_offset.at("positions")]);
-        data[0] = agent->x;
-        data[1] = agent->y;
+
+        int small_fish_count = 0;
+        int large_fish_count = 0;
+
+
+        // std::map <int, unsigned long long int> track_fish;
+        std::map <std::string, float> small_positions;
+        std::map <std::string, float> large_positions;
+
+        for (int i = 0; i < (int)entities.size(); i++){
+            auto ent = entities[i];
+            if (ent->type == FISH){
+                if (ent->rx < agent->rx && small_fish_count < 1){
+                small_fish_count++;
+                // track_fish.insert_or_assign(std::pair<int, unsigned long long int> (1, ent->get_id()));
+                small_positions.insert(std::pair<std::string, float> ("x", ent->x));
+                small_positions.insert(std::pair<std::string, float> ("y", ent->y));
+                small_positions.insert(std::pair<std::string, float> ("rx", ent->rx));
+                } 
+                else {
+                large_fish_count++;    
+                large_positions.insert(std::pair<std::string, float> ("x", ent->x));
+                large_positions.insert(std::pair<std::string, float> ("y", ent->y));
+                large_positions.insert(std::pair<std::string, float> ("rx", ent->rx));
+                // track_fish.insert_or_assign(std::pair<int, unsigned long long int> (2, ent->get_id()));
+                }
+            }
+        }
+        if (small_fish_count < 1) spawn_small_fish();
+        if (large_fish_count < 1) spawn_large_fish();
+        
+        data[3] = agent->x;
+        data[4] = agent->y;
+        data[5] = agent->rx;
 
         int32_t fish_count = (int)entities.size() - 1;
         *(int32_t *)(info_bufs[info_name_to_offset.at("fish_count")]) = fish_count;
         int32_t fish_alive = 0;
+        
+        // std::cout << "Smol" << small_fish_count << std::endl; 
+        data[0] = small_positions["x"];
+        data[1] = small_positions["y"];
+        data[2] = small_positions["rx"];
 
-        if (SINGLE_FISH) spawn_single_fish();
-        else {
-            if (rand_gen.randn(20) == 1) spawn_fish();
-        }
-
-        data[2] = entities[fish_count]->x;
-        data[3] = entities[fish_count]->y;
-        // data[4] = (float)cur_time;
-        // data[5] = 0.0;
+        // std::cout << "bij" << small_fish_count+large_fish_count << std::endl; 
+        data[6] = large_positions["x"];
+        data[7] = large_positions["y"];
+        data[8] = large_positions["rx"];
 
         if (fish_eaten >= FISH_QUOTA) {
             step_data.done = true;
@@ -117,24 +149,19 @@ class EBigFishL : public BasicAbstractGame {
             step_data.level_complete = true;
         }
 
-        step_data.reward += get_reward(data[0], data[1], data[2], data[3]);
+        // step_data.reward += get_reward(data[0], data[1], data[4], data[5]);
         // step_data.reward += SURVIVAL_REWARD_PER_STEP * cur_time;
         if (action_vx > 0)
             agent->is_reflected = false;
         if (action_vx < 0)
             agent->is_reflected = true;
-
-        if (cur_time == timeout-2){
-            step_data.reward += COMPLETION_BONUS;
-            step_data.done = true;
-        }
     }
 
     void spawn_single_fish(){
-        if ((int)entities.size()-1 < 1) spawn_fish();
+        if ((int)entities.size()-1 < 1) spawn_small_fish();
     }
     
-    void spawn_fish(){
+    void spawn_large_fish(){
         // float ent_r = (FISH_MAX_R - FISH_MIN_R) * pow(rand_gen.rand01(), 1.4) + FISH_MIN_R;       
         float ent_r = agent->rx + r_inc;       
         // ent_r = std::max(ent_r, agent->rx + r_inc);
@@ -143,7 +170,24 @@ class EBigFishL : public BasicAbstractGame {
         // float ent_y = rand_gen.rand01() * (main_height ) * rand_gen.randn((int)main_height);
         float ent_y = rand_gen.randrange(0, main_height);
         float moves_right = rand_gen.rand01() < .5;
-        float ent_vx = 1.5*(.15 + rand_gen.rand01() * .25) * (moves_right ? 1 : -1);
+        float ent_vx = (.15 + rand_gen.rand01() * .25) * (moves_right ? 1 : -1);
+        // ent_vx = std::clamp(ent_vx, -0.30f, 0.30f);
+        float ent_x = moves_right ? -1 * ent_r : main_width + ent_r;
+        int type = FISH;
+        auto ent = add_entity(ent_x, ent_y, ent_vx, 0, ent_r, type);
+        choose_random_theme(ent);
+        match_aspect_ratio(ent);
+        ent->is_reflected = !moves_right;
+    }
+
+    void spawn_small_fish(){
+        float ent_r = (FISH_MAX_R - FISH_MIN_R) * pow(rand_gen.rand01(), 1.4) + FISH_MIN_R;
+        // float agent_size = agent->rx;
+        ent_r = std::min(ent_r, agent->rx - r_inc);
+        float ent_y = rand_gen.rand01() * (main_height - 2 * ent_r);
+        // ent_y = std::clamp(ent_y, agent->y - main_height/8, agent->y + main_height/8);
+        float moves_right = rand_gen.rand01() < .5;
+        float ent_vx = (.15 + rand_gen.rand01() * .25) * (moves_right ? 1 : -1);
         // ent_vx = std::clamp(ent_vx, -0.30f, 0.30f);
         float ent_x = moves_right ? -1 * ent_r : main_width + ent_r;
         int type = FISH;
@@ -222,4 +266,4 @@ class EBigFishL : public BasicAbstractGame {
     }
 };
 
-REGISTER_GAME(NAME, EBigFishL);
+REGISTER_GAME(NAME, BigFishM);

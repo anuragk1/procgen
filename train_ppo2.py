@@ -14,10 +14,10 @@ from utils.wrappers import VecPyTorch#, VecExtractDictObs, VecMonitor
 from utils.agent import CNNAgent, MLPAgent
 
 exp_name = os.path.basename(__file__).rstrip(".py")
-gym_id = "ebigfishs"
+gym_id = "ebigfishl"
 learning_rate = 2.5e-4
 seed = 1
-total_timesteps = int(1e6)
+total_timesteps = int(1e9)
 torch_deterministic = True
 cuda = True
 prod_mode = False
@@ -27,7 +27,7 @@ capture_video = False
 save_path = f"models/{exp_name}"
 
 num_minibatches = 16
-num_envs = 1
+num_envs = 256*4
 num_steps = 256 # the number of steps per game environment
 gamma = 0.95
 gae_lambda = 0.95
@@ -137,8 +137,8 @@ for update in range(1, num_updates+1):
     # print(f"obs after rollouts: {obs.shape}")
     with torch.no_grad():
         last_value = agent.get_value(next_obs.to(device)).reshape(1, -1)
-        print(last_value)
-        print(last_value.shape)
+        # print(last_value)
+        # print(last_value.shape)
         if gae:
             advantages = torch.zeros_like(rewards).to(device)
             lastgaelam = 0

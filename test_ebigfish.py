@@ -5,7 +5,7 @@ import sys
 
 INTERACTIVE = True
 
-env_name = "ebigfishs"
+env_name = "bigfishm"
 obj_list = ["fish_pos", "fish_count", "fish_id"]
 
 if INTERACTIVE:
@@ -30,6 +30,7 @@ while NB_DONE < TO_SUCCEED:
     
     rew, obs, done = env.observe()
     print(f"reward : {rew}")
+    # print(f"observation : {obs['positions']}")
     # total_reward += rew
     # all_objects = env.get_info()[0]
     # agent_pos = all_objects["agent_pos"]

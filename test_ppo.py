@@ -14,7 +14,7 @@ seed = 1
 torch_deterministic = True
 num_envs = 1
 cuda = True
-gym_id = "ebigfishs"
+gym_id = "ebigfishl"
 experiment_name = f"{gym_id}__{exp_name}__{seed}__{int(time.time())}"
 
 
