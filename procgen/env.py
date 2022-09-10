@@ -14,6 +14,7 @@ MAX_STATE_SIZE = 2 ** 20
 ENV_NAMES = [
     "bigfish",
     "bigfishm",
+    "bigfishr",
     "ebigfish",
     "ebigfishs",
     "ebigfishl",

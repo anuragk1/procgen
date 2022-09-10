@@ -4,7 +4,7 @@
 #include <queue>
 
  
-const std::string NAME = "bigfishm";
+const std::string NAME = "bigfishr";
 
 const int COMPLETION_BONUS = 10.0f;
 const int POSITIVE_REWARD = 1.0f;
@@ -22,12 +22,12 @@ const int UNDEFINED_POSITION = 0;
 const bool SINGLE_FISH = true;
 // const bool FISH_SMALLER_THAN_AGENT = false;
 
-class BigFishM : public BasicAbstractGame {
+class BigFishR : public BasicAbstractGame {
   public:
     int fish_eaten = 0;
     float r_inc = 0.0;
 
-    BigFishM()
+    BigFishR()
         : BasicAbstractGame(NAME) {
         timeout = 500;
 
@@ -94,52 +94,23 @@ class BigFishM : public BasicAbstractGame {
     void game_step() override {
         BasicAbstractGame::game_step();
         float_t *data = (float *)(obs_bufs[obs_name_to_offset.at("positions")]);
-
-        int small_fish_count = 0;
-        int large_fish_count = 0;
-
-
-        // std::map <int, unsigned long long int> track_fish;
-        std::map <std::string, float> small_positions;
-        std::map <std::string, float> large_positions;
-
-        for (int i = 0; i < (int)entities.size(); i++){
-            auto ent = entities[i];
-            if (ent->type == FISH){
-                if (ent->rx < agent->rx && small_fish_count < 1){
-                small_fish_count++;
-                // track_fish.insert_or_assign(std::pair<int, unsigned long long int> (1, ent->get_id()));
-                small_positions.insert(std::pair<std::string, float> ("x", ent->x));
-                small_positions.insert(std::pair<std::string, float> ("y", ent->y));
-                small_positions.insert(std::pair<std::string, float> ("rx", ent->rx));
-                } 
-                else {
-                large_fish_count++;    
-                large_positions.insert(std::pair<std::string, float> ("x", ent->x));
-                large_positions.insert(std::pair<std::string, float> ("y", ent->y));
-                large_positions.insert(std::pair<std::string, float> ("rx", ent->rx));
-                // track_fish.insert_or_assign(std::pair<int, unsigned long long int> (2, ent->get_id()));
-                }
-            }
-        }
-        if (small_fish_count < 1) spawn_small_fish();
-        if (large_fish_count < 1) spawn_large_fish();
         
-        data[3] = agent->x;
-        data[4] = agent->y;
-        data[5] = agent->rx;
+        data[0] = agent->x;
+        data[1] = agent->y;
+        data[2] = agent->rx;
 
         int32_t fish_count = (int)entities.size() - 1;
         *(int32_t *)(info_bufs[info_name_to_offset.at("fish_count")]) = fish_count;
-        int32_t fish_alive = 0;
-        
-        data[0] = small_positions["x"];
-        data[1] = small_positions["y"];
-        data[2] = small_positions["rx"];
+        float choose_fize_size = rand_gen.rand01();
 
-        data[6] = large_positions["x"];
-        data[7] = large_positions["y"];
-        data[8] = large_positions["rx"];
+        if (fish_count < 1){
+            if (choose_fize_size > 0.5) spawn_small_fish();
+            else spawn_large_fish();
+        }
+        
+        data[3] = entities[fish_count]->x;
+        data[4] = entities[fish_count]->y;
+        data[5] = entities[fish_count]->rx;
 
         if (fish_eaten >= FISH_QUOTA) {
             step_data.done = true;
@@ -264,4 +235,4 @@ class BigFishM : public BasicAbstractGame {
     }
 };
 
-REGISTER_GAME(NAME, BigFishM);
+REGISTER_GAME(NAME, BigFishR);
