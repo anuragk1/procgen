@@ -54,6 +54,7 @@ class EBigFishL : public BasicAbstractGame {
 
         if (obj->type == FISH) {
             if (obj->rx > agent->rx) {
+                step_data.reward += -0.5*COMPLETION_BONUS;
                 step_data.done = true;
             } else {
                 step_data.reward += POSITIVE_REWARD;
@@ -99,7 +100,6 @@ class EBigFishL : public BasicAbstractGame {
 
         int32_t fish_count = (int)entities.size() - 1;
         *(int32_t *)(info_bufs[info_name_to_offset.at("fish_count")]) = fish_count;
-        int32_t fish_alive = 0;
 
         if (SINGLE_FISH) spawn_single_fish();
         else {
@@ -128,6 +128,10 @@ class EBigFishL : public BasicAbstractGame {
             step_data.reward += COMPLETION_BONUS;
             step_data.done = true;
         }
+        // if (fish_count == 0 and cur_time > 1){
+        //     step_data.reward += COMPLETION_BONUS;
+        //     step_data.done = true;
+        // }
     }
 
     void spawn_single_fish(){
@@ -141,7 +145,8 @@ class EBigFishL : public BasicAbstractGame {
 
         // float ent_y = rand_gen.rand01() * (main_height - 2 * ent_r);
         // float ent_y = rand_gen.rand01() * (main_height ) * rand_gen.randn((int)main_height);
-        float ent_y = rand_gen.randrange(0, main_height);
+        // float ent_y = rand_gen.randrange(0, main_height);
+        float ent_y = agent->y + rand_gen.rand01() * rand_gen.randrange(0, agent->rx);
         float moves_right = rand_gen.rand01() < .5;
         float ent_vx = 1.5*(.15 + rand_gen.rand01() * .25) * (moves_right ? 1 : -1);
         // ent_vx = std::clamp(ent_vx, -0.30f, 0.30f);
@@ -154,10 +159,10 @@ class EBigFishL : public BasicAbstractGame {
     }
 
     float get_reward(float agent_x, float agent_y, float fish_x, float fish_y){
-        // float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
-        float distance = std::sqrt(std::abs(agent_y - fish_y));
-        // float scale = 0.01;
-        float scale = 0.05;
+        float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
+        // float distance = std::sqrt(std::abs(agent_y - fish_y));
+        float scale = 0.01;
+        // float scale = 0.025;
 
         return (float)(scale * distance);
     }
