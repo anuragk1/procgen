@@ -6,7 +6,7 @@
  
 const std::string NAME = "bigfishr";
 
-const int COMPLETION_BONUS = 10.0f;
+const int COMPLETION_BONUS = 5.0f;
 const int POSITIVE_REWARD = 1.0f;
 const float SURVIVAL_REWARD_PER_STEP = 0.00005; //TO DO: Come up with a reward system 
 
@@ -15,7 +15,7 @@ const int FISH = 2;
 const float FISH_MIN_R = .25;
 const float FISH_MAX_R = 2;
 
-const int FISH_QUOTA = 30;
+const int FISH_QUOTA = 5;
 
 const int UNDEFINED_POSITION = 0;
 
@@ -29,10 +29,10 @@ class BigFishR : public BasicAbstractGame {
 
     BigFishR()
         : BasicAbstractGame(NAME) {
-        timeout = 500;
+        timeout = 1000;
 
         main_width = 20;
-        main_height = 3;
+        main_height = 6;
     }
 
     void load_background_images() override {
@@ -55,6 +55,7 @@ class BigFishR : public BasicAbstractGame {
         if (obj->type == FISH) {
             if (obj->rx > agent->rx) {
                 step_data.done = true;
+                // step_data.reward += -POSITIVE_REWARD;
             } else {
                 step_data.reward += POSITIVE_REWARD;
                 obj->will_erase = true;
@@ -77,7 +78,7 @@ class BigFishR : public BasicAbstractGame {
             start_r = 1;
         }
 
-        r_inc = (FISH_MAX_R - start_r) / FISH_QUOTA;
+        r_inc = (FISH_MAX_R - start_r) / (FISH_QUOTA * 5);
 
         agent->rx = start_r;
         agent->ry = start_r;
@@ -114,7 +115,7 @@ class BigFishR : public BasicAbstractGame {
 
         if (fish_eaten >= FISH_QUOTA) {
             step_data.done = true;
-            step_data.reward += COMPLETION_BONUS;
+            // step_data.reward += COMPLETION_BONUS;
             step_data.level_complete = true;
         }
 

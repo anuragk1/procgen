@@ -1,3 +1,4 @@
+from turtle import forward
 import torch
 import torch.nn as nn
 from torch.distributions.categorical import Categorical
@@ -27,9 +28,10 @@ class MLPAgent(nn.Module):
         super(MLPAgent, self).__init__()
         self.network = nn.Sequential(
             layer_init(nn.Linear(np.array(envs.observation_space.shape).prod(), 32)),
-            nn.Tanh(),
+            # layer_init(nn.Linear(8, 32)),
+            nn.ReLU(),
+            # nn.Tanh(),
             # layer_init(nn.Linear(32, 32)),
-            # nn.ReLU(),
             # layer_init(nn.Linear(64, 128)),
             # nn.ReLU(),
             # layer_init(nn.Linear(128, 128)),
@@ -37,7 +39,8 @@ class MLPAgent(nn.Module):
             # layer_init(nn.Linear(128, 64)),
             # nn.ReLU(),
             layer_init(nn.Linear(32, 32)),
-            nn.Tanh()
+            nn.ReLU()
+            # nn.Tanh()
         )
         self.actor = layer_init(nn.Linear(32, envs.action_space.n), std=0.01)
         self.critic = layer_init(nn.Linear(32, 1), std=1)
@@ -75,6 +78,31 @@ class CNNAgent(nn.Module):
 
     def forward(self, x):
         return self.network(x.permute((0, 3, 1, 2))) # "bhwc" -> "bchw"
+
+    def get_action(self, x, action=None):
+        logits = self.actor(self.forward(x))
+        probs = Categorical(logits=logits)
+        if action is None:
+            action = probs.sample()
+        return action, probs.log_prob(action), probs.entropy()
+
+    def get_value(self, x):
+        return self.critic(self.forward(x))
+
+class AttAgent(nn.Module):
+    def __init__(self, envs,):
+        super(AttAgent, self).__init__()
+        self.network = nn.Sequential(
+            layer_init(nn.Linear(np.array(envs.observation_space.shape).prod(), 32)),
+            nn.LeakyReLU(),
+            layer_init(nn.Linear(32, 32)),
+            nn.LeakyReLU(),
+        )
+        self.actor = layer_init(nn.Linear(32, 2), std=0.01) # 2 actions: eat and dodge
+        self.critic = layer_init(nn.Linear(32, 1), std=1)
+
+    def forward(self, x):
+        return self.network(x)
 
     def get_action(self, x, action=None):
         logits = self.actor(self.forward(x))
