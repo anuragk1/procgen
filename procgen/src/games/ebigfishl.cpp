@@ -159,10 +159,10 @@ class EBigFishL : public BasicAbstractGame {
     }
 
     float get_reward(float agent_x, float agent_y, float fish_x, float fish_y){
-        float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
-        // float distance = std::sqrt(std::abs(agent_y - fish_y));
-        float scale = 0.01;
-        // float scale = 0.025;
+        // float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
+        float distance = std::sqrt(std::abs(agent_y - fish_y));
+        // float scale = 0.01;
+        float scale = 0.05;
 
         return (float)(scale * distance);
     }
