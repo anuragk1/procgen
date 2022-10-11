@@ -18,6 +18,17 @@ def preprocess_obs(obs):
     
     return new_obs
 
+def preprocess_obs_r(obs):
+    new_obs = obs
+    new_obs = new_obs.cpu().detach().numpy()
+    idxs = np.arange(new_obs[0].size)
+    del_idx = np.arange(2, new_obs[0].size, 3)
+    idxs = np.delete(idxs, del_idx)
+    new_obs = np.delete(new_obs, idxs, axis=1)
+    new_obs = torch.Tensor(new_obs).to(device)
+    
+    return new_obs
+
 def split_obs(obs):
     obs_split = obs
     obs_split = obs_split.cpu().detach().numpy()

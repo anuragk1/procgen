@@ -93,12 +93,12 @@ class AttAgent(nn.Module):
     def __init__(self, envs,):
         super(AttAgent, self).__init__()
         self.network = nn.Sequential(
-            layer_init(nn.Linear(np.array(envs.observation_space.shape).prod(), 32)),
+            layer_init(nn.Linear(4, 32)),
             nn.LeakyReLU(),
-            layer_init(nn.Linear(32, 32)),
-            nn.LeakyReLU(),
+            # layer_init(nn.Linear(32, 32)),
+            # nn.LeakyReLU(),
         )
-        self.actor = layer_init(nn.Linear(32, 2), std=0.01) # 2 actions: eat and dodge
+        self.actor = layer_init(nn.Linear(32, 2)) # 2 actions: eat and dodge
         self.critic = layer_init(nn.Linear(32, 1), std=1)
 
     def forward(self, x):
@@ -106,6 +106,8 @@ class AttAgent(nn.Module):
 
     def get_action(self, x, action=None):
         logits = self.actor(self.forward(x))
+        # logits = self.actor(x)
+        # print(logits)
         probs = Categorical(logits=logits)
         if action is None:
             action = probs.sample()
@@ -113,6 +115,7 @@ class AttAgent(nn.Module):
 
     def get_value(self, x):
         return self.critic(self.forward(x))
+        # return self.critic(x)
 
 class DDT(nn.Module):
     def __init__(self, input_dim, weights, comparators, leaves, output_dim=None, alpha=1.0, is_value=False, use_gpu=True):
