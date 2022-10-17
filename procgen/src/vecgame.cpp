@@ -632,8 +632,8 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
         strcpy(s.name, "fish_id");
         s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
         s.dtype = LIBENV_DTYPE_INT32;
-        s.shape[0] = 20;
-        s.ndim = 1,
+        // s.shape[0] = 20;
+        s.ndim = 0,
         s.low.int32 = 0;
         s.high.int32 = INT32_MAX;
         info_types.push_back(s);

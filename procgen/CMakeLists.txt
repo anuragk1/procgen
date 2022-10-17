@@ -63,6 +63,7 @@ add_library(env
   src/games/ecoinrun.cpp
   src/games/fruitbot.cpp
   src/games/heist.cpp
+  src/games/eheist.cpp
   src/games/jumper.cpp
   src/games/leaper.cpp
   src/games/maze.cpp

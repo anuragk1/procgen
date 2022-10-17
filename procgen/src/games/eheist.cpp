@@ -5,7 +5,7 @@
 #include "../mazegen.h"
 #include "../cpp-utils.h"
 
-const std::string NAME = "heist";
+const std::string NAME = "eheist";
 
 const float COMPLETION_BONUS = 10.0f;
 
@@ -14,14 +14,14 @@ const int KEY = 2;
 const int EXIT = 9;
 const int KEY_ON_RING = 11;
 
-class HeistGame : public BasicAbstractGame {
+class EHeistGame : public BasicAbstractGame {
   public:
     std::shared_ptr<MazeGen> maze_gen;
     int world_dim = 0;
     int num_keys = 0;
     std::vector<bool> has_keys;
 
-    HeistGame()
+    EHeistGame()
         : BasicAbstractGame(NAME) {
         maze_gen = nullptr;
         has_useful_vel_info = false;
@@ -87,6 +87,11 @@ class HeistGame : public BasicAbstractGame {
         } else if (obj->type == KEY) {
             obj->will_erase = true;
             has_keys[obj->image_theme] = true;
+            if (std::count(has_keys.begin(), has_keys.end(), true)) {
+                step_data.done = true;
+                step_data.reward = COMPLETION_BONUS;
+                step_data.level_complete = true;
+            }
         } else if (obj->type == LOCKED_DOOR) {
             int door_num = obj->image_theme;
             if (has_keys[door_num]) {
@@ -112,27 +117,13 @@ class HeistGame : public BasicAbstractGame {
         main_height = world_dim;
     }
 
-    // void observe() override {
-    //     Game::observe();
-    //     int32_t key_count = 0;
-    //     for (const auto& has_key : has_keys) {
-    //         if (has_key) {
-    //             key_count++;
-    //         }
-    //     }
-    //     *(int32_t *)(info_bufs[info_name_to_offset.at("key_count")]) = key_count;
-    //     // *(int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]) = agent->x;
-    //     int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]);
-    //     data[0] = agent->x;
-    //     data[1] = agent->y;
-    // }
-
     void game_reset() override {
         BasicAbstractGame::game_reset();
 
-        int min_maze_dim = 5;
+        int min_maze_dim = 3;
         int max_diff = (world_dim - min_maze_dim) / 2;
         int difficulty = rand_gen.randn(max_diff + 1);
+        difficulty = 2;
 
         options.center_agent = options.distribution_mode == MemoryMode;
 
@@ -144,6 +135,8 @@ class HeistGame : public BasicAbstractGame {
 
         if (num_keys > 3)
             num_keys = 3;
+
+        num_keys = 1;
 
         has_keys.clear();
 
@@ -168,6 +161,8 @@ class HeistGame : public BasicAbstractGame {
 
         int off_x = rand_gen.randn(world_dim - maze_dim + 1);
         int off_y = rand_gen.randn(world_dim - maze_dim + 1);
+        off_x = 0;
+        off_y = 0;
 
         for (int i = 0; i < grid_size; i++) {
             set_obj(i, WALL_OBJ);
@@ -191,13 +186,16 @@ class HeistGame : public BasicAbstractGame {
                     auto ent = spawn_entity(.375 * maze_scale, KEY, maze_scale * x, maze_scale * y, maze_scale, maze_scale);
                     ent->image_theme = obj - KEY_OBJ - 1;
                     match_aspect_ratio(ent);
-                } else if (obj >= DOOR_OBJ) {
-                    auto ent = add_entity(obj_x, obj_y, 0, 0, r_ent, LOCKED_DOOR);
-                    ent->image_theme = obj - DOOR_OBJ - 1;
-                } else if (obj == EXIT_OBJ) {
-                    auto ent = spawn_entity(.375 * maze_scale, EXIT, maze_scale * x, maze_scale * y, maze_scale, maze_scale);
-                    match_aspect_ratio(ent);
-                } else if (obj == AGENT_OBJ) {
+                }
+                //  else if (obj >= DOOR_OBJ) {
+                //     auto ent = add_entity(obj_x, obj_y, 0, 0, r_ent, LOCKED_DOOR);
+                //     ent->image_theme = obj - DOOR_OBJ - 1;
+                // }
+                //  else if (obj == EXIT_OBJ) {
+                //     auto ent = spawn_entity(.375 * maze_scale, EXIT, maze_scale * x, maze_scale * y, maze_scale, maze_scale);
+                //     match_aspect_ratio(ent);
+                // } 
+                else if (obj == AGENT_OBJ) {
                     agent->x = obj_x;
                     agent->y = obj_y;
                 }
@@ -215,13 +213,34 @@ class HeistGame : public BasicAbstractGame {
             ent->use_abs_coords = true;
             match_aspect_ratio(ent);
         }
+
+        std::cout << maze_gen <<std::endl;
     }
 
     void game_step() override {
         BasicAbstractGame::game_step();
 
         agent->face_direction(action_vx, action_vy);
+        // for (auto ent : entities){
+        //     std::cout << ent->type << " " << ent->x << " " << ent->y << " ";
+        // }
+        std::cout<< grid_size<<std::endl;
     }
+
+    // void observe() override {
+    //     Game::observe();
+    //     int32_t key_count = 0;
+    //     for (const auto& has_key : has_keys) {
+    //         if (has_key) {
+    //             key_count++;
+    //         }
+    //     }
+    //     *(int32_t *)(info_bufs[info_name_to_offset.at("key_count")]) = key_count;
+    //     // *(int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]) = agent->x;
+    //     int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at("agent_pos")]);
+    //     data[0] = agent->x;
+    //     data[1] = agent->y;
+    // }
 
     void serialize(WriteBuffer *b) override {
         BasicAbstractGame::serialize(b);
@@ -238,4 +257,4 @@ class HeistGame : public BasicAbstractGame {
     }
 };
 
-REGISTER_GAME(NAME, HeistGame);
+REGISTER_GAME(NAME, EHeistGame);
