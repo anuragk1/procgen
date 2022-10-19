@@ -29,6 +29,7 @@ ENV_NAMES = [
     "fruitbot",
     "heist",
     "eheist",
+    "eheistl",
     "jumper",
     "leaper",
     "maze",

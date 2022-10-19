@@ -655,14 +655,43 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
         s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
         s.dtype = LIBENV_DTYPE_FLOAT32;
         s.shape[0] = 2;
-        s.shape[1] = 3;
-        s.ndim = 2;
+        // s.shape[1] = 3;
+        s.ndim = 1;
         s.low.float32 = 0.25f;
         s.high.float32 = 2.0f;
         observation_types.push_back(s);
     }
     }
 
+    else if (env_name == "eheist"){
+        {
+            struct libenv_tensortype s;
+            strcpy(s.name, "positions");
+            s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
+            s.dtype = LIBENV_DTYPE_FLOAT32;
+            s.shape[0] = 2;
+            s.shape[1] = 3;
+            s.ndim = 2;
+            s.low.float32 = 0.25f;
+            s.high.float32 = 2.0f;
+            observation_types.push_back(s);
+        }
+    }
+
+    else if (env_name == "eheistl"){
+        {
+            struct libenv_tensortype s;
+            strcpy(s.name, "positions");
+            s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
+            s.dtype = LIBENV_DTYPE_FLOAT32;
+            s.shape[0] = 2;
+            s.shape[1] = 3;
+            s.ndim = 2;
+            s.low.float32 = 0.25f;
+            s.high.float32 = 2.0f;
+            observation_types.push_back(s);
+        }
+    }
 
     RandGen game_level_seed_gen;
     game_level_seed_gen.seed(rand_seed);
