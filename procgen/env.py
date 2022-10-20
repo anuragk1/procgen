@@ -30,6 +30,7 @@ ENV_NAMES = [
     "heist",
     "eheist",
     "eheistl",
+    "eheistlk",
     "jumper",
     "leaper",
     "maze",

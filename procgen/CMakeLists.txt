@@ -65,6 +65,7 @@ add_library(env
   src/games/heist.cpp
   src/games/eheist.cpp
   src/games/eheistl.cpp
+  src/games/eheistlk.cpp
   src/games/jumper.cpp
   src/games/leaper.cpp
   src/games/maze.cpp
