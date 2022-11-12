@@ -9,7 +9,7 @@ Entity::Entity() {
 Entity::Entity(float _x, float _y, float _vx, float _vy, float _rx, float _ry, int _type) {
     
     time_t timestamp = time(0);
-    eID = timestamp + (rand() % 100);
+    eID = (timestamp % 100000) + (rand() % 1000);
 
     x = _x;
     y = _y;

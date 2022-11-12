@@ -117,6 +117,32 @@ class AttAgent(nn.Module):
         return self.critic(self.forward(x))
         # return self.critic(x)
 
+class SubGoalAgent(nn.Module):
+    def __init__(self,):
+        super(SubGoalAgent, self).__init__()
+        self.alpha = 0.95
+        self.network = nn.Sequential(
+            layer_init(nn.Linear(4, 32)),
+            nn.LeakyReLU(),
+        )
+        self.actor = layer_init(nn.Linear(32, 2))
+        self.critic = layer_init(nn.Linear(32, 1))
+
+    def forward(self, x):
+        return self.network(x)
+
+    def get_action(self, x, action=None):
+        logits = self.actor(self.forward(x))
+        probs = Categorical(logits=logits)
+        if action is None:
+            action = probs.sample()
+        return action, probs.log_prob(action), probs.entropy(), probs.probs
+
+    def get_value(self, x):
+        return self.critic(self.forward(x))
+        # return self.critic(x)
+
+
 class DDT(nn.Module):
     def __init__(self, input_dim, weights, comparators, leaves, output_dim=None, alpha=1.0, is_value=False, use_gpu=True):
         super(DDT, self).__init__()

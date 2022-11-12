@@ -27,6 +27,12 @@ class BigFishR : public BasicAbstractGame {
     int fish_eaten = 0;
     float r_inc = 0.0;
 
+    float total_neg_reward = 0;
+
+    int32_t id_ = 0;
+    int32_t id_1;
+    int32_t id_2;
+
     BigFishR()
         : BasicAbstractGame(NAME) {
         timeout = 1000;
@@ -54,14 +60,17 @@ class BigFishR : public BasicAbstractGame {
 
         if (obj->type == FISH) {
             if (obj->rx > agent->rx) {
+                step_data.reward += -POSITIVE_REWARD;
+                // step_data.reward += -0.5*COMPLETION_BONUS + 0.5*fish_eaten;
                 step_data.done = true;
-                // step_data.reward += -POSITIVE_REWARD;
             } else {
                 step_data.reward += POSITIVE_REWARD;
+                // step_data.reward += -(total_neg_reward/10);
                 obj->will_erase = true;
                 agent->rx += r_inc;
                 agent->ry += r_inc;
                 fish_eaten += 1;
+                // total_neg_reward = 0;
             }
         }
     }
@@ -86,10 +95,10 @@ class BigFishR : public BasicAbstractGame {
         agent->y = float(main_height/2) + rand_gen.randrange(float(-main_height/5), float(main_height/5));
         // agent->y = 1 + agent->ry;
 
-        for (int c = 0 ; c < 20; c++) {
-        //   set_ID("fish_id", 0, c);
-          set_pos_array("fish_pos", UNDEFINED_POSITION, UNDEFINED_POSITION, c);
-        }
+        // for (int c = 0 ; c < 20; c++) {
+        // //   set_ID("fish_id", 0, c);
+        //   set_pos_array("fish_pos", UNDEFINED_POSITION, UNDEFINED_POSITION, c);
+        // }
     }
 
     void game_step() override {
@@ -108,14 +117,40 @@ class BigFishR : public BasicAbstractGame {
             if (choose_fize_size > 0.5) spawn_small_fish();
             else spawn_large_fish();
         }
-        
+
+        int32_t fish_id = entities[fish_count]->get_id();
+        *(int32_t *)(info_bufs[info_name_to_offset.at("fish_id")]) = fish_id;
+
+        // for (int i = 0; i < entities.size() - 1; i++){
+        //     auto ent = entities[i];
+        //     if (ent->type == FISH){
+        //         data[3] = ent->x;
+        //         data[4] = ent->y;
+        //         data[5] = ent->rx;
+        //     }
+        // }
+
         data[3] = entities[fish_count]->x;
         data[4] = entities[fish_count]->y;
         data[5] = entities[fish_count]->rx;
+        
+        // std::cout<< entities[fish_count]->get_id() <<std::endl;
+
+        if (data[2] <= data[5]){
+            step_data.reward += get_reward_large(data[0], data[1], data[3], data[4]);
+            // step_data.reward += POSITIVE_REWARD;
+        } 
+
+        if (data[2] > data[5]){
+            step_data.reward += get_reward_small(data[0], data[1], data[3], data[4]);
+            // step_data.reward = -POSITIVE_REWARD;
+            // step_data.reward += neg_rew;
+            // total_neg_reward += neg_rew;
+        } 
 
         if (fish_eaten >= FISH_QUOTA) {
             step_data.done = true;
-            // step_data.reward += COMPLETION_BONUS;
+            step_data.reward += COMPLETION_BONUS;
             step_data.level_complete = true;
         }
 
@@ -127,22 +162,24 @@ class BigFishR : public BasicAbstractGame {
             agent->is_reflected = true;
     }
 
-    void spawn_single_fish(){
-        if ((int)entities.size()-1 < 1) spawn_small_fish();
-    }
+    // void spawn_single_fish(){
+    //     if ((int)entities.size()-1 < 1) spawn_small_fish();
+    // }
     
     void spawn_large_fish(){
         // float ent_r = (FISH_MAX_R - FISH_MIN_R) * pow(rand_gen.rand01(), 1.4) + FISH_MIN_R;       
-        float ent_r = agent->rx + r_inc;       
+        float ent_r = agent->rx + 3*r_inc;       
         // ent_r = std::max(ent_r, agent->rx + r_inc);
 
         // float ent_y = rand_gen.rand01() * (main_height - 2 * ent_r);
         // float ent_y = rand_gen.rand01() * (main_height ) * rand_gen.randn((int)main_height);
-        float ent_y = rand_gen.randrange(0, main_height);
+        // float ent_y = rand_gen.randrange(0, main_height);
+        float ent_y = agent->y + rand_gen.rand01() * rand_gen.randrange(0, agent->rx);
         float moves_right = rand_gen.rand01() < .5;
         float ent_vx = (.15 + rand_gen.rand01() * .25) * (moves_right ? 1 : -1);
         // ent_vx = std::clamp(ent_vx, -0.30f, 0.30f);
-        float ent_x = moves_right ? -1 * ent_r : main_width + ent_r;
+        // float ent_x = moves_right ? -1 * ent_r : main_width + ent_r;
+        float ent_x = moves_right ? -1 * ent_r * 0 : main_width + ent_r * 0;
         int type = FISH;
         auto ent = add_entity(ent_x, ent_y, ent_vx, 0, ent_r, type);
         choose_random_theme(ent);
@@ -153,7 +190,7 @@ class BigFishR : public BasicAbstractGame {
     void spawn_small_fish(){
         float ent_r = (FISH_MAX_R - FISH_MIN_R) * pow(rand_gen.rand01(), 1.4) + FISH_MIN_R;
         // float agent_size = agent->rx;
-        ent_r = std::min(ent_r, agent->rx - r_inc);
+        ent_r = std::min(ent_r, agent->rx - 3*r_inc);
         float ent_y = rand_gen.rand01() * (main_height - 2 * ent_r);
         // ent_y = std::clamp(ent_y, agent->y - main_height/8, agent->y + main_height/8);
         float moves_right = rand_gen.rand01() < .5;
@@ -167,13 +204,23 @@ class BigFishR : public BasicAbstractGame {
         ent->is_reflected = !moves_right;
     }
 
-    float get_reward(float agent_x, float agent_y, float fish_x, float fish_y){
-        // float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
-        float distance = std::sqrt(std::abs(agent_y - fish_y));
+    float get_reward_small(float agent_x, float agent_y, float fish_x, float fish_y){
+        float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
+        float scale = -0.1/50;// -1/(28.28); // maximum posible distance = 28.28
+        return distance * scale; // +y_proximity_reward + x_proximity_reward + proximity_reward;
+        // float rew = std::min(scale * 0.5, scale / (distance + 1e-8));
+        // return rew;
+    }
+    
+    float get_reward_large(float agent_x, float agent_y, float fish_x, float fish_y){
+        float distance = std::sqrt(std::abs(std::pow(agent_x - fish_x, 2)) + std::abs(std::pow(agent_y - fish_y, 2)));
+        // float distance = std::sqrt(std::abs(agent_y - fish_y));
         // float scale = 0.01;
-        float scale = 0.05;
-
+        float scale = 0.1/50;
         return (float)(scale * distance);
+
+        // float y_distance = std::abs(agent_y - fish_y);
+        // return scale * y_distance / main_height;
     }
 
     void serialize(WriteBuffer *b) override {
@@ -189,12 +236,12 @@ class BigFishR : public BasicAbstractGame {
     }
 
   
-    void set_pos_array(const std::string & name, float_t x, float_t y, int32_t c){
-        float_t *data = (float_t *)(info_bufs[info_name_to_offset.at(name)]);
-        data[c*2+0] = x;
-        data[c*2+1] = y;
-        // data[c*3+2] = rx;
-    }
+    // void set_pos_array(const std::string & name, float_t x, float_t y, int32_t c){
+    //     float_t *data = (float_t *)(info_bufs[info_name_to_offset.at(name)]);
+    //     data[c*2+0] = x;
+    //     data[c*2+1] = y;
+    //     // data[c*3+2] = rx;
+    // }
 
     // void set_ID(const std::string & name, int32_t id, int32_t c){
     //     int32_t *data = (int32_t *)(info_bufs[info_name_to_offset.at(name)]);

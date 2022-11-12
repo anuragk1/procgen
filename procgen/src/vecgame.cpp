@@ -655,8 +655,8 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
         s.scalar_type = LIBENV_SCALAR_TYPE_REAL;
         s.dtype = LIBENV_DTYPE_FLOAT32;
         s.shape[0] = 2;
-        // s.shape[1] = 3;
-        s.ndim = 1;
+        s.shape[1] = 3;
+        s.ndim = 2;
         s.low.float32 = 0.25f;
         s.high.float32 = 2.0f;
         observation_types.push_back(s);
